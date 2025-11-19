@@ -121,7 +121,7 @@ fn main() -> anyhow::Result<()> {
                 path.cyan()
             );
 
-            let db = VectorDB::builder()
+            let _db = VectorDB::builder()
                 .dimensions(dimensions)
                 .storage_path(&path)
                 .distance_metric(parse_metric(&metric))
@@ -143,7 +143,7 @@ fn main() -> anyhow::Result<()> {
 
             let dimensions = vector_data.len();
 
-            let db = VectorDB::builder()
+            let _db = VectorDB::builder()
                 .dimensions(dimensions)
                 .storage_path(&path)
                 .build()?;
@@ -156,7 +156,7 @@ fn main() -> anyhow::Result<()> {
             };
 
             let start = Instant::now();
-            db.insert(entry)?;
+            _db.insert(entry)?;
             let elapsed = start.elapsed();
 
             println!("{} Vector inserted successfully!", "✓".green().bold());
@@ -172,7 +172,7 @@ fn main() -> anyhow::Result<()> {
 
             let dimensions = vector_data.len();
 
-            let db = VectorDB::builder()
+            let _db = VectorDB::builder()
                 .dimensions(dimensions)
                 .storage_path(&path)
                 .build()?;
@@ -186,7 +186,7 @@ fn main() -> anyhow::Result<()> {
             };
 
             let start = Instant::now();
-            let results = db.search(query)?;
+            let results = _db.search(query)?;
             let elapsed = start.elapsed();
 
             println!("{} Found {} results", "✓".green().bold(), results.len());
@@ -206,13 +206,13 @@ fn main() -> anyhow::Result<()> {
         Commands::Stats { path } => {
             println!("{} Opening database...", "→".green().bold());
 
-            let db = VectorDB::builder()
+            let _db = VectorDB::builder()
                 .dimensions(384) // Default, actual doesn't matter for stats
                 .storage_path(&path)
                 .build()?;
 
-            let stats = db.stats();
-            let count = db.count()?;
+            let stats = _db.stats();
+            let count = _db.count()?;
 
             println!("{} Database Statistics", "✓".green().bold());
             println!();
@@ -241,7 +241,7 @@ fn main() -> anyhow::Result<()> {
             println!("  Dimensions: {}", dimensions);
             println!();
 
-            let db = VectorDB::builder()
+            let _db = VectorDB::builder()
                 .dimensions(dimensions)
                 .storage_path(&path)
                 .build()?;
@@ -264,7 +264,7 @@ fn main() -> anyhow::Result<()> {
             println!("{} Inserting vectors...", "→".yellow());
 
             let start = Instant::now();
-            db.insert_batch(vectors)?;
+            _db.insert_batch(vectors)?;
             let insert_time = start.elapsed();
 
             println!(
@@ -294,7 +294,7 @@ fn main() -> anyhow::Result<()> {
                     threshold: None,
                     ef_search: None,
                 };
-                db.search(query)?;
+                _db.search(query)?;
             }
             let search_time = start.elapsed();
 

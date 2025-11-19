@@ -189,17 +189,9 @@ impl VectorDB {
 }
 
 /// Builder for VectorDB configuration
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct VectorDbBuilder {
     config: VectorDbConfig,
-}
-
-impl Default for VectorDbBuilder {
-    fn default() -> Self {
-        Self {
-            config: VectorDbConfig::default(),
-        }
-    }
 }
 
 impl VectorDbBuilder {

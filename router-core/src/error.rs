@@ -26,7 +26,12 @@ pub enum VectorDbError {
 
     /// Invalid dimensions
     #[error("Invalid dimensions: expected {expected}, got {actual}")]
-    InvalidDimensions { expected: usize, actual: usize },
+    InvalidDimensions {
+        /// Expected dimensions
+        expected: usize,
+        /// Actual dimensions
+        actual: usize,
+    },
 
     /// Vector not found
     #[error("Vector not found: {0}")]

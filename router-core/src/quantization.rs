@@ -95,7 +95,7 @@ fn product_quantize(
     subspaces: usize,
     _k: usize,
 ) -> Result<QuantizedVector> {
-    if vector.len() % subspaces != 0 {
+    if !vector.len().is_multiple_of(subspaces) {
         return Err(VectorDbError::Quantization(
             "Vector length must be divisible by number of subspaces".to_string(),
         ));
@@ -120,7 +120,7 @@ fn product_quantize(
 fn binary_quantize(vector: &[f32]) -> QuantizedVector {
     let threshold = vector.iter().sum::<f32>() / vector.len() as f32;
 
-    let num_bytes = (vector.len() + 7) / 8;
+    let num_bytes = vector.len().div_ceil(8);
     let mut data = vec![0u8; num_bytes];
 
     for (i, &val) in vector.iter().enumerate() {
@@ -158,7 +158,7 @@ pub fn calculate_compression_ratio(
         QuantizationType::None => original_bytes,
         QuantizationType::Scalar => original_dims + 8, // u8 per dim + min + scale
         QuantizationType::Product { subspaces, .. } => subspaces + 4, // u8 per subspace + overhead
-        QuantizationType::Binary => (original_dims + 7) / 8 + 4, // 1 bit per dim + threshold
+        QuantizationType::Binary => original_dims.div_ceil(8) + 4, // 1 bit per dim + threshold
     };
 
     original_bytes as f32 / quantized_bytes as f32

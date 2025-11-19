@@ -6,8 +6,7 @@ use napi::bindgen_prelude::*;
 use napi_derive::napi;
 use router_core::{
     DistanceMetric as CoreDistanceMetric, SearchQuery as CoreSearchQuery,
-    SearchResult as CoreSearchResult, VectorDB as CoreVectorDB,
-    VectorEntry as CoreVectorEntry,
+    VectorDB as CoreVectorDB, VectorEntry as CoreVectorEntry,
 };
 use std::collections::HashMap;
 use std::sync::Arc;
