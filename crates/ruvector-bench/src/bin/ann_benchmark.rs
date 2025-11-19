@@ -9,7 +9,8 @@ use ruvector_bench::{
     create_progress_bar, calculate_recall, BenchmarkResult, DatasetGenerator,
     LatencyStats, MemoryProfiler, ResultWriter, VectorDistribution,
 };
-use ruvector_core::{DbOptions, DistanceMetric, HnswConfig, QuantizationConfig, SearchQuery, VectorDB, VectorEntry};
+use ruvector_core::VectorDB;
+use ruvector_core::types::{DbOptions, DistanceMetric, HnswConfig, QuantizationConfig, SearchQuery, VectorEntry};
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::time::Instant;
@@ -119,7 +120,7 @@ fn load_dataset(args: &Args) -> Result<(Vec<Vec<f32>>, Vec<Vec<f32>>, Vec<Vec<St
             });
 
             let pb = create_progress_bar(args.num_vectors as u64, "Generating vectors");
-            let vectors = (0..args.num_vectors)
+            let vectors: Vec<Vec<f32>> = (0..args.num_vectors)
                 .map(|_| {
                     pb.inc(1);
                     gen.generate(1).into_iter().next().unwrap()

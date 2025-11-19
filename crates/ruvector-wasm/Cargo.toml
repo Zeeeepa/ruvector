@@ -12,9 +12,10 @@ description = "WASM bindings for Ruvector for browser deployment"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-ruvector-core = { path = "../ruvector-core", default-features = false }
+ruvector-core = { path = "../ruvector-core", default-features = false, features = ["uuid-support"] }
 parking_lot = { workspace = true }
 getrandom = { workspace = true }
+uuid = { workspace = true }
 
 # WASM
 wasm-bindgen = { workspace = true }

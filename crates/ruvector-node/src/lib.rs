@@ -158,14 +158,13 @@ impl JsVectorEntry {
 
 /// Search query parameters
 #[napi(object)]
-#[derive(Debug)]
 pub struct JsSearchQuery {
     /// Query vector as Float32Array or array of numbers
     pub vector: Float32Array,
     /// Number of results to return (top-k)
     pub k: u32,
-    /// Optional metadata filters as JSON object
-    pub filter: Option<serde_json::Value>,
+    /// Optional metadata filters as JSON string
+    pub filter: Option<String>,
     /// Optional ef_search parameter for HNSW
     pub ef_search: Option<u32>,
 }
@@ -173,15 +172,17 @@ pub struct JsSearchQuery {
 impl JsSearchQuery {
     fn to_core(&self) -> Result<SearchQuery> {
         let filter = self.filter.as_ref().and_then(|f| {
-            if let serde_json::Value::Object(obj) = f {
-                Some(obj.clone())
-            } else {
-                None
-            }
+            serde_json::from_str::<serde_json::Value>(f).ok().and_then(|v| {
+                if let serde_json::Value::Object(obj) = v {
+                    Some(obj.into_iter().collect())
+                } else {
+                    None
+                }
+            })
         });
 
         Ok(SearchQuery {
-            vector: self.vector.to_vec(),
+            vector: self.vector.iter().map(|&x| x as f32).collect(),
             k: self.k as usize,
             filter,
             ef_search: self.ef_search.map(|v| v as usize),
@@ -197,20 +198,24 @@ pub struct JsSearchResult {
     pub id: String,
     /// Distance/similarity score (lower is better for distance metrics)
     pub score: f64,
-    /// Vector data (optional)
-    pub vector: Option<Vec<f32>>,
-    /// Metadata (optional)
-    pub metadata: Option<serde_json::Value>,
+    /// Vector data (optional) - converted to f64 for NAPI compatibility
+    pub vector: Option<Vec<f64>>,
+    /// Metadata (optional) - as JSON string for NAPI compatibility
+    pub metadata: Option<String>,
 }
 
 impl From<SearchResult> for JsSearchResult {
     fn from(result: SearchResult) -> Self {
-        let metadata = result.metadata.map(serde_json::Value::Object);
+        let metadata = result.metadata.and_then(|m| {
+            let map: serde_json::Map<String, serde_json::Value> = m.into_iter().collect();
+            let val = serde_json::Value::Object(map);
+            serde_json::to_string(&val).ok()
+        });
 
         JsSearchResult {
             id: result.id,
             score: f64::from(result.score),
-            vector: result.vector,
+            vector: result.vector.map(|v| v.into_iter().map(|x| x as f64).collect()),
             metadata,
         }
     }

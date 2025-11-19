@@ -11,7 +11,8 @@ use clap::Parser;
 use ruvector_bench::{
     create_progress_bar, DatasetGenerator, MemoryProfiler, VectorDistribution,
 };
-use ruvector_core::{DbOptions, DistanceMetric, HnswConfig, QuantizationConfig, SearchQuery, VectorDB, VectorEntry};
+use ruvector_core::VectorDB;
+use ruvector_core::types::{DbOptions, DistanceMetric, HnswConfig, QuantizationConfig, SearchQuery, VectorEntry};
 use std::path::PathBuf;
 use std::time::Instant;
 

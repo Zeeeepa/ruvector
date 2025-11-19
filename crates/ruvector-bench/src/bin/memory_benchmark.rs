@@ -11,7 +11,8 @@ use ruvector_bench::{
     create_progress_bar, BenchmarkResult, DatasetGenerator, MemoryProfiler,
     ResultWriter, VectorDistribution,
 };
-use ruvector_core::{DbOptions, DistanceMetric, HnswConfig, QuantizationConfig, VectorDB, VectorEntry};
+use ruvector_core::VectorDB;
+use ruvector_core::types::{DbOptions, DistanceMetric, HnswConfig, QuantizationConfig, VectorEntry};
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::time::Instant;

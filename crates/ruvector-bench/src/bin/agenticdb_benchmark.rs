@@ -13,7 +13,8 @@ use ruvector_bench::{
     create_progress_bar, BenchmarkResult, DatasetGenerator, LatencyStats,
     MemoryProfiler, ResultWriter, VectorDistribution,
 };
-use ruvector_core::{DbOptions, DistanceMetric, HnswConfig, SearchQuery, VectorDB, VectorEntry};
+use ruvector_core::VectorDB;
+use ruvector_core::types::{DbOptions, DistanceMetric, HnswConfig, SearchQuery, VectorEntry};
 use serde_json::json;
 use std::collections::HashMap;
 use std::path::PathBuf;
