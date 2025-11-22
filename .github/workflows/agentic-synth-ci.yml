@@ -120,11 +120,13 @@ jobs:
       - name: Run integration tests
         if: github.event.inputs.run_tests != 'false'
         working-directory: ${{ env.PACKAGE_PATH }}
+        shell: bash
         run: npm run test:integration || echo "Integration tests require API keys"
 
       - name: Run CLI tests
         if: github.event.inputs.run_tests != 'false'
         working-directory: ${{ env.PACKAGE_PATH }}
+        shell: bash
         run: npm run test:cli || echo "CLI tests require API keys - skipping failures"
 
       - name: Upload build artifacts
