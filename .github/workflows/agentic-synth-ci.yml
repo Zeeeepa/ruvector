@@ -49,7 +49,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: ${{ env.PACKAGE_PATH }}
-        run: npm ci
+        run: npm install
 
       - name: Run TypeScript type checking
         working-directory: ${{ env.PACKAGE_PATH }}
@@ -90,7 +90,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: ${{ env.PACKAGE_PATH }}
-        run: npm ci
+        run: npm install
 
       - name: Build package (ESM + CJS)
         working-directory: ${{ env.PACKAGE_PATH }}
@@ -154,7 +154,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: ${{ env.PACKAGE_PATH }}
-        run: npm ci
+        run: npm install
 
       - name: Run tests with coverage
         working-directory: ${{ env.PACKAGE_PATH }}
@@ -196,7 +196,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: ${{ env.PACKAGE_PATH }}
-        run: npm ci
+        run: npm install
 
       - name: Build package
         working-directory: ${{ env.PACKAGE_PATH }}
@@ -255,7 +255,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: ${{ env.PACKAGE_PATH }}
-        run: npm ci
+        run: npm install
 
       - name: Build package
         working-directory: ${{ env.PACKAGE_PATH }}
