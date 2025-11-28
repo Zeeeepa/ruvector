@@ -168,7 +168,7 @@ if [ "$RUN_ABLATION" = true ]; then
     
     START_TIME=$(date +%s)
     
-    cargo run --release --bin gnn_ablation_benchmark -- \
+    cargo run --release --bin gnn-ablation-benchmark -- \
         --num-vectors ${NUM_VECTORS} \
         --num-queries ${NUM_QUERIES} \
         --dimensions 128 \
@@ -194,7 +194,7 @@ if [ "$RUN_BEIR" = true ]; then
     
     START_TIME=$(date +%s)
     
-    cargo run --release --bin beir_benchmark -- \
+    cargo run --release --bin beir-benchmark -- \
         --dataset synthetic \
         --num-docs ${NUM_VECTORS} \
         --num-queries ${NUM_QUERIES} \
@@ -221,7 +221,7 @@ if [ "$RUN_ANN" = true ]; then
     START_TIME=$(date +%s)
     
     # SIFT1M-like benchmark
-    cargo run --release --bin ann_benchmarks_export -- \
+    cargo run --release --bin ann-benchmarks-export -- \
         --dataset sift1m \
         --num-vectors ${NUM_VECTORS} \
         --num-queries ${NUM_QUERIES} \
