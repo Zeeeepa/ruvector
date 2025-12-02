@@ -59,6 +59,7 @@ impl RuvLLM {
             &config.learning,
             router.clone(),
             memory.clone(),
+            config.embedding.dimension,
         )?);
 
         // Start background services
@@ -360,19 +361,34 @@ struct Metrics {
 #[cfg(feature = "metrics")]
 impl Metrics {
     fn new() -> Self {
-        Self {
-            request_counter: prometheus::register_int_counter!(
+        use once_cell::sync::Lazy;
+
+        // Use lazy statics to ensure metrics are only registered once
+        static REQUEST_COUNTER: Lazy<prometheus::IntCounter> = Lazy::new(|| {
+            prometheus::register_int_counter!(
                 "ruvllm_requests_total",
                 "Total number of requests"
-            ).unwrap(),
-            latency_histogram: prometheus::register_histogram!(
+            ).unwrap()
+        });
+
+        static LATENCY_HISTOGRAM: Lazy<prometheus::Histogram> = Lazy::new(|| {
+            prometheus::register_histogram!(
                 "ruvllm_request_latency_seconds",
                 "Request latency in seconds"
-            ).unwrap(),
-            quality_gauge: prometheus::register_gauge!(
+            ).unwrap()
+        });
+
+        static QUALITY_GAUGE: Lazy<prometheus::Gauge> = Lazy::new(|| {
+            prometheus::register_gauge!(
                 "ruvllm_quality_score",
                 "Average quality score"
-            ).unwrap(),
+            ).unwrap()
+        });
+
+        Self {
+            request_counter: REQUEST_COUNTER.clone(),
+            latency_histogram: LATENCY_HISTOGRAM.clone(),
+            quality_gauge: QUALITY_GAUGE.clone(),
         }
     }
 }

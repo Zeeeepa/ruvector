@@ -19,6 +19,8 @@ pub struct LearningService {
     router: Arc<RwLock<FastGRNNRouter>>,
     /// Memory reference
     memory: Arc<MemoryService>,
+    /// Embedding dimension for creating new vectors
+    embedding_dim: usize,
     /// Replay buffer
     replay_buffer: RwLock<ReplayBuffer>,
     /// EWC state
@@ -54,11 +56,13 @@ impl LearningService {
         config: &LearningConfig,
         router: Arc<RwLock<FastGRNNRouter>>,
         memory: Arc<MemoryService>,
+        embedding_dim: usize,
     ) -> Result<Self> {
         Ok(Self {
             config: config.clone(),
             router,
             memory,
+            embedding_dim,
             replay_buffer: RwLock::new(ReplayBuffer {
                 entries: Vec::new(),
                 capacity: config.replay_capacity,
@@ -122,6 +126,16 @@ impl LearningService {
         response: &str,
         context: &[String],
     ) -> Result<InteractionOutcome> {
+        // Skip if learning is disabled
+        if !self.config.enabled {
+            return Ok(InteractionOutcome {
+                quality_score: 0.0,
+                used_nodes: vec![],
+                task_success: true,
+                user_rating: None,
+            });
+        }
+
         // Evaluate quality (mock - in production use LLM judge)
         let quality_score = self.evaluate_quality(query, response, context);
 
@@ -184,13 +198,13 @@ impl LearningService {
         }
 
         // Response should relate to query
-        let query_words: std::collections::HashSet<_> = query
-            .to_lowercase()
+        let query_lower = query.to_lowercase();
+        let query_words: std::collections::HashSet<_> = query_lower
             .split_whitespace()
             .filter(|w| w.len() > 3)
             .collect();
-        let response_words: std::collections::HashSet<_> = response
-            .to_lowercase()
+        let response_lower = response.to_lowercase();
+        let response_words: std::collections::HashSet<_> = response_lower
             .split_whitespace()
             .filter(|w| w.len() > 3)
             .collect();
@@ -211,8 +225,8 @@ impl LearningService {
         // Create combined Q&A node
         let text = format!("Q: {}\nA: {}", query, response);
 
-        // Mock embedding
-        let vector = vec![0.0f32; 768];
+        // Mock embedding using configured dimension
+        let vector = vec![0.0f32; self.embedding_dim];
 
         let node = MemoryNode {
             id: Uuid::new_v4().to_string(),

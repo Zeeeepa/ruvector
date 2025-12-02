@@ -70,7 +70,7 @@ pub mod types;
 pub use config::{Config, ConfigBuilder};
 pub use error::{Error, Result};
 pub use orchestrator::RuvLLM;
-pub use types::{Request, Response, Session};
+pub use types::{Feedback, Request, Response, RoutingInfo, Session};
 
 /// Library version
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
