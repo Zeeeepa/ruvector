@@ -2,7 +2,9 @@
 
 [![MIT License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Crates.io](https://img.shields.io/crates/v/ruvector-core.svg)](https://crates.io/crates/ruvector-core)
+[![SONA](https://img.shields.io/crates/v/ruvector-sona.svg?label=sona)](https://crates.io/crates/ruvector-sona)
 [![npm](https://img.shields.io/npm/v/ruvector.svg)](https://www.npmjs.com/package/ruvector)
+[![@ruvector/sona](https://img.shields.io/npm/v/@ruvector/sona.svg?label=%40ruvector%2Fsona)](https://www.npmjs.com/package/@ruvector/sona)
 [![Rust](https://img.shields.io/badge/rust-1.77%2B-orange.svg)](https://www.rust-lang.org)
 [![Build](https://img.shields.io/github/actions/workflow/status/ruvnet/ruvector/ci.yml?branch=main)](https://github.com/ruvnet/ruvector/actions)
 [![Docs](https://img.shields.io/badge/docs-latest-brightgreen.svg)](./docs/)
@@ -30,6 +32,7 @@ Traditional vector databases just store and search. When you ask "find similar i
 7. **39 attention mechanisms** — Flash, linear, graph, hyperbolic for custom models
 8. **Drop into Postgres** — pgvector-compatible extension with SIMD acceleration
 9. **Run anywhere** — Node.js, browser (WASM), HTTP server, or native Rust
+10. **Continuous learning** — SONA enables runtime adaptation with LoRA, EWC++, and ReasoningBank
 
 Think of it as: **Pinecone + Neo4j + PyTorch + postgres + etcd** in one Rust package.
 
@@ -83,6 +86,7 @@ npx ruvector
 | **Graph Queries** | ✅ Cypher | ❌ | ❌ | ❌ | ❌ |
 | **Hyperedges** | ✅ | ❌ | ❌ | ❌ | ❌ |
 | **Self-Learning (GNN)** | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **Runtime Adaptation (SONA)** | ✅ LoRA+EWC++ | ❌ | ❌ | ❌ | ❌ |
 | **AI Agent Routing** | ✅ Tiny Dancer | ❌ | ❌ | ❌ | ❌ |
 | **Attention Mechanisms** | ✅ 39 types | ❌ | ❌ | ❌ | ❌ |
 | **Hyperbolic Embeddings** | ✅ Poincaré | ❌ | ❌ | ❌ | ❌ |
@@ -140,6 +144,7 @@ cargo add ruvector-raft ruvector-cluster ruvector-replication
 | **Semantic Router** | Route queries to optimal endpoints | Multi-model AI orchestration |
 | **Tiny Dancer** | FastGRNN neural inference | Optimize LLM inference costs |
 | **Adaptive Routing** | Learn optimal routing strategies | Minimize latency, maximize accuracy |
+| **SONA** | Two-tier LoRA + EWC++ + ReasoningBank | Runtime learning without retraining |
 
 ### Attention Mechanisms (`@ruvector/attention`)
 
@@ -305,8 +310,10 @@ RETURN related
 | Platform | Command |
 |----------|---------|
 | **npm** | `npm install ruvector` |
+| **npm (SONA)** | `npm install @ruvector/sona` |
 | **Browser/WASM** | `npm install ruvector-wasm` |
 | **Rust** | `cargo add ruvector-core ruvector-graph ruvector-gnn` |
+| **Rust (SONA)** | `cargo add ruvector-sona` |
 
 ## Documentation
 
@@ -381,20 +388,44 @@ All crates are published to [crates.io](https://crates.io) under the `ruvector-*
 
 ### Self-Optimizing Neural Architecture (SONA)
 
-| Crate | Description | crates.io |
-|-------|-------------|-----------|
-| [sona](./crates/sona) | Runtime-adaptive learning with LoRA, EWC++, and ReasoningBank | [![crates.io](https://img.shields.io/crates/v/sona.svg)](https://crates.io/crates/sona) |
+| Crate | Description | crates.io | npm |
+|-------|-------------|-----------|-----|
+| [ruvector-sona](./crates/sona) | Runtime-adaptive learning with LoRA, EWC++, and ReasoningBank | [![crates.io](https://img.shields.io/crates/v/ruvector-sona.svg)](https://crates.io/crates/ruvector-sona) | [![npm](https://img.shields.io/npm/v/@ruvector/sona.svg)](https://www.npmjs.com/package/@ruvector/sona) |
 
-**SONA** enables AI systems to continuously improve from user feedback without expensive retraining. Features two-tier LoRA (MicroLoRA + BaseLoRA), EWC++ for catastrophic forgetting prevention, and ReasoningBank for pattern storage. Includes WASM and Node.js bindings.
+**SONA** enables AI systems to continuously improve from user feedback without expensive retraining:
+
+- **Two-tier LoRA**: MicroLoRA (rank 1-2) for instant adaptation, BaseLoRA (rank 4-16) for long-term learning
+- **EWC++**: Elastic Weight Consolidation prevents catastrophic forgetting
+- **ReasoningBank**: K-means++ clustering stores and retrieves successful reasoning patterns
+- **Lock-free Trajectories**: ~50ns overhead per step with crossbeam ArrayQueue
+- **Sub-millisecond Learning**: <0.8ms per trajectory processing
+
+```bash
+# Rust
+cargo add ruvector-sona
+
+# Node.js
+npm install @ruvector/sona
+```
 
 ```rust
-use sona::{SonaEngine, SonaConfig};
+use ruvector_sona::{SonaEngine, SonaConfig};
 
 let engine = SonaEngine::new(SonaConfig::default());
 let traj_id = engine.start_trajectory(query_embedding);
 engine.record_step(traj_id, node_id, 0.85, 150);
 engine.end_trajectory(traj_id, 0.90);
 engine.learn_from_feedback(LearningSignal::positive(50.0, 0.95));
+```
+
+```javascript
+// Node.js
+const { SonaEngine } = require('@ruvector/sona');
+
+const engine = new SonaEngine(256); // 256 hidden dimensions
+const trajId = engine.beginTrajectory([0.1, 0.2, ...]);
+engine.addTrajectoryStep(trajId, activations, attention, 0.9);
+engine.endTrajectory(trajId, 0.95);
 ```
 
 ### PostgreSQL Extension
