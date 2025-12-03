@@ -2,12 +2,23 @@
 name = "sona"
 version = "0.1.0"
 edition = "2021"
-authors = ["RuVector Team"]
-description = "Self-Optimizing Neural Architecture with ReasoningBank integration"
+rust-version = "1.70"
+authors = ["RuVector Team <team@ruvector.dev>"]
+description = "Self-Optimizing Neural Architecture - Runtime-adaptive learning for LLM routers with two-tier LoRA, EWC++, and ReasoningBank"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/ruvnet/ruvector"
-keywords = ["neural", "learning", "lora", "wasm", "adaptive"]
-categories = ["science", "wasm"]
+homepage = "https://github.com/ruvnet/ruvector/tree/main/crates/sona"
+documentation = "https://docs.rs/sona"
+readme = "README.md"
+keywords = ["neural", "learning", "lora", "llm", "adaptive"]
+categories = ["science", "algorithms", "wasm"]
+include = [
+    "src/**/*",
+    "Cargo.toml",
+    "README.md",
+    "LICENSE-MIT",
+    "LICENSE-APACHE",
+]
 
 [package.metadata.wasm-pack.profile.release]
 wasm-opt = false
