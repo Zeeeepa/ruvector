@@ -8,6 +8,7 @@
 //! - **Training Templates**: Pre-configured training setups for common use cases
 //! - **Agent Factory**: Create and manage multiple specialized agents
 //! - **Training Pipelines**: Structured workflows for different verticals
+//! - **Federated Learning**: Distributed training across ephemeral agents
 //! - **Metrics & Results**: Comprehensive training analytics
 //!
 //! ## Quick Start
@@ -25,11 +26,29 @@
 //! }
 //! let results = pipeline.train()?;
 //! ```
+//!
+//! ## Federated Learning
+//!
+//! ```rust,ignore
+//! use ruvector_sona::training::{EphemeralAgent, FederatedCoordinator};
+//!
+//! // Create coordinator
+//! let mut coordinator = FederatedCoordinator::default_coordinator("main", 3072);
+//!
+//! // Ephemeral agents process tasks
+//! let mut agent = EphemeralAgent::default_federated("agent-1", 3072);
+//! agent.process_trajectory(embedding, activations, quality, route, context);
+//!
+//! // Export state before termination
+//! let export = agent.export_state();
+//! coordinator.aggregate(export);
+//! ```
 
 mod templates;
 mod factory;
 mod pipeline;
 mod metrics;
+mod federated;
 
 pub use templates::{
     TrainingTemplate, TemplatePreset, VerticalConfig,
@@ -46,4 +65,9 @@ pub use pipeline::{
 pub use metrics::{
     TrainingMetrics, TrainingResult, EpochStats,
     QualityMetrics, PerformanceMetrics,
+};
+pub use federated::{
+    EphemeralAgent, FederatedCoordinator, AgentExport,
+    TrajectoryExport, AgentExportStats, AgentContribution,
+    AggregationResult, CoordinatorStats, FederatedTopology,
 };

@@ -57,7 +57,7 @@ impl ManagedAgent {
                 agent_type,
                 created_at: now,
             },
-            engine: SonaEngine::new(config),
+            engine: SonaEngine::with_config(config),
             metrics: TrainingMetrics::new(&id),
             purpose: purpose.into(),
             training_count: 0,

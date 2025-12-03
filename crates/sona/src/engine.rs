@@ -145,6 +145,86 @@ impl SonaEngine {
     pub fn config(&self) -> &SonaConfig {
         &self.config
     }
+
+    /// Get all learned patterns from the reasoning bank
+    #[cfg(feature = "serde-support")]
+    pub fn get_all_patterns(&self) -> Vec<crate::LearnedPattern> {
+        self.coordinator.reasoning_bank().read().get_all_patterns()
+    }
+
+    /// Export LoRA state for serialization
+    #[cfg(feature = "serde-support")]
+    pub fn export_lora_state(&self) -> crate::export::safetensors::LoRAState {
+        use crate::export::safetensors::{LoRAState, LoRALayerState};
+
+        let mut state = LoRAState::default();
+
+        // Export MicroLoRA (single layer)
+        if let Some(lora) = self.coordinator.micro_lora().try_read() {
+            let (down, up) = lora.get_weights();
+            state.micro_lora_layers.push(LoRALayerState {
+                lora_a: down.clone(),
+                lora_b: up.clone(),
+                rank: self.config.micro_lora_rank,
+                input_dim: self.config.hidden_dim,
+                output_dim: self.config.hidden_dim,
+            });
+        }
+
+        // Export BaseLoRA (multi-layer)
+        if let Some(lora) = self.coordinator.base_lora().try_read() {
+            for idx in 0..lora.num_layers() {
+                if let Some((down, up)) = lora.get_layer_weights(idx) {
+                    state.base_lora_layers.push(LoRALayerState {
+                        lora_a: down.clone(),
+                        lora_b: up.clone(),
+                        rank: lora.rank,
+                        input_dim: lora.hidden_dim,
+                        output_dim: lora.hidden_dim,
+                    });
+                }
+            }
+        }
+
+        state
+    }
+
+    /// Get quality trajectories for preference learning export
+    #[cfg(feature = "serde-support")]
+    pub fn get_quality_trajectories(&self) -> Vec<crate::export::dataset::QualityTrajectory> {
+        use crate::export::dataset::QualityTrajectory;
+
+        // Get buffered trajectories from the instant loop via coordinator
+        let trajectories = self.coordinator.reasoning_bank().read().get_all_patterns();
+
+        trajectories.iter().map(|p| {
+            QualityTrajectory {
+                query_embedding: p.centroid.clone(),
+                response_embedding: p.centroid.clone(), // Use centroid as proxy
+                route: p.pattern_type.to_string(),
+                quality: p.avg_quality,
+                context_ids: vec![],
+            }
+        }).collect()
+    }
+
+    /// Get routing decisions for distillation export
+    #[cfg(feature = "serde-support")]
+    pub fn get_routing_decisions(&self) -> Vec<crate::export::dataset::RoutingDecision> {
+        use crate::export::dataset::RoutingDecision;
+
+        let patterns = self.coordinator.reasoning_bank().read().get_all_patterns();
+
+        patterns.iter().map(|p| {
+            RoutingDecision {
+                query_embedding: p.centroid.clone(),
+                routing_logits: vec![p.avg_quality], // Simplified
+                selected_route: p.pattern_type.to_string(),
+                confidence: p.avg_quality,
+                quality: p.avg_quality,
+            }
+        }).collect()
+    }
 }
 
 /// Builder for SonaEngine

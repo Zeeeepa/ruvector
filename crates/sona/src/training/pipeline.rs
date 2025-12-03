@@ -317,7 +317,7 @@ impl TrainingPipeline {
         let name = name.into();
         Self {
             name: name.clone(),
-            engine: SonaEngine::new(config),
+            engine: SonaEngine::with_config(config),
             batch_config: BatchConfig::default(),
             training_method: TrainingMethod::default(),
             stage: PipelineStage::Idle,
