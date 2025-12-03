@@ -14,10 +14,19 @@ use super::scalar;
 // ============================================================================
 
 /// Check if AVX-512F is available at runtime
+/// Note: AVX-512 intrinsics require nightly Rust, so this returns false on stable builds
+/// To enable AVX-512, compile with --features simd-avx512 on nightly Rust
 #[cfg(target_arch = "x86_64")]
 #[inline]
 pub fn is_avx512_available() -> bool {
-    is_x86_feature_detected!("avx512f")
+    #[cfg(feature = "simd-avx512")]
+    {
+        is_x86_feature_detected!("avx512f")
+    }
+    #[cfg(not(feature = "simd-avx512"))]
+    {
+        false
+    }
 }
 
 #[cfg(not(target_arch = "x86_64"))]
@@ -101,7 +110,7 @@ fn is_avx512_aligned(a: *const f32, b: *const f32) -> bool {
 // AVX-512 Implementations (16 floats per iteration)
 // ============================================================================
 
-#[cfg(target_arch = "x86_64")]
+#[cfg(all(target_arch = "x86_64", feature = "simd-avx512"))]
 #[target_feature(enable = "avx512f")]
 #[inline]
 /// Euclidean distance using AVX-512 (processes 16 floats per iteration)
@@ -135,7 +144,7 @@ pub unsafe fn l2_distance_ptr_avx512(a: *const f32, b: *const f32, len: usize) -
     result.sqrt()
 }
 
-#[cfg(target_arch = "x86_64")]
+#[cfg(all(target_arch = "x86_64", feature = "simd-avx512"))]
 #[target_feature(enable = "avx512f")]
 #[inline]
 /// Cosine distance using AVX-512 (processes 16 floats per iteration)
@@ -184,7 +193,7 @@ pub unsafe fn cosine_distance_ptr_avx512(a: *const f32, b: *const f32, len: usiz
     1.0 - (dot_sum / denominator)
 }
 
-#[cfg(target_arch = "x86_64")]
+#[cfg(all(target_arch = "x86_64", feature = "simd-avx512"))]
 #[target_feature(enable = "avx512f")]
 #[inline]
 /// Inner product using AVX-512 (processes 16 floats per iteration)
@@ -215,7 +224,7 @@ pub unsafe fn inner_product_ptr_avx512(a: *const f32, b: *const f32, len: usize)
     -result
 }
 
-#[cfg(target_arch = "x86_64")]
+#[cfg(all(target_arch = "x86_64", feature = "simd-avx512"))]
 #[target_feature(enable = "avx512f")]
 #[inline]
 /// Manhattan distance using AVX-512 (processes 16 floats per iteration)
@@ -248,7 +257,7 @@ pub unsafe fn manhattan_distance_ptr_avx512(a: *const f32, b: *const f32, len: u
     result
 }
 
-#[cfg(target_arch = "x86_64")]
+#[cfg(all(target_arch = "x86_64", feature = "simd-avx512"))]
 #[target_feature(enable = "avx512f")]
 #[inline]
 /// Cosine distance for pre-normalized vectors using AVX-512
@@ -283,28 +292,28 @@ pub unsafe fn cosine_distance_normalized_avx512(a: *const f32, b: *const f32, le
 // AVX-512 Slice-based Wrappers
 // ============================================================================
 
-#[cfg(target_arch = "x86_64")]
+#[cfg(all(target_arch = "x86_64", feature = "simd-avx512"))]
 #[target_feature(enable = "avx512f")]
 #[inline]
 unsafe fn euclidean_distance_avx512(a: &[f32], b: &[f32]) -> f32 {
     l2_distance_ptr_avx512(a.as_ptr(), b.as_ptr(), a.len())
 }
 
-#[cfg(target_arch = "x86_64")]
+#[cfg(all(target_arch = "x86_64", feature = "simd-avx512"))]
 #[target_feature(enable = "avx512f")]
 #[inline]
 unsafe fn cosine_distance_avx512(a: &[f32], b: &[f32]) -> f32 {
     cosine_distance_ptr_avx512(a.as_ptr(), b.as_ptr(), a.len())
 }
 
-#[cfg(target_arch = "x86_64")]
+#[cfg(all(target_arch = "x86_64", feature = "simd-avx512"))]
 #[target_feature(enable = "avx512f")]
 #[inline]
 unsafe fn inner_product_avx512(a: &[f32], b: &[f32]) -> f32 {
     inner_product_ptr_avx512(a.as_ptr(), b.as_ptr(), a.len())
 }
 
-#[cfg(target_arch = "x86_64")]
+#[cfg(all(target_arch = "x86_64", feature = "simd-avx512"))]
 #[target_feature(enable = "avx512f")]
 #[inline]
 unsafe fn manhattan_distance_avx512(a: &[f32], b: &[f32]) -> f32 {
@@ -691,6 +700,7 @@ pub unsafe fn manhattan_distance_ptr_scalar(a: *const f32, b: *const f32, len: u
 pub unsafe fn l2_distance_ptr(a: *const f32, b: *const f32, len: usize) -> f32 {
     #[cfg(target_arch = "x86_64")]
     {
+        #[cfg(feature = "simd-avx512")]
         if is_x86_feature_detected!("avx512f") {
             return l2_distance_ptr_avx512(a, b, len);
         }
@@ -713,6 +723,7 @@ pub unsafe fn l2_distance_ptr(a: *const f32, b: *const f32, len: usize) -> f32 {
 pub unsafe fn cosine_distance_ptr(a: *const f32, b: *const f32, len: usize) -> f32 {
     #[cfg(target_arch = "x86_64")]
     {
+        #[cfg(feature = "simd-avx512")]
         if is_x86_feature_detected!("avx512f") {
             return cosine_distance_ptr_avx512(a, b, len);
         }
@@ -735,6 +746,7 @@ pub unsafe fn cosine_distance_ptr(a: *const f32, b: *const f32, len: usize) -> f
 pub unsafe fn inner_product_ptr(a: *const f32, b: *const f32, len: usize) -> f32 {
     #[cfg(target_arch = "x86_64")]
     {
+        #[cfg(feature = "simd-avx512")]
         if is_x86_feature_detected!("avx512f") {
             return inner_product_ptr_avx512(a, b, len);
         }
@@ -757,6 +769,7 @@ pub unsafe fn inner_product_ptr(a: *const f32, b: *const f32, len: usize) -> f32
 pub unsafe fn manhattan_distance_ptr(a: *const f32, b: *const f32, len: usize) -> f32 {
     #[cfg(target_arch = "x86_64")]
     {
+        #[cfg(feature = "simd-avx512")]
         if is_x86_feature_detected!("avx512f") {
             return manhattan_distance_ptr_avx512(a, b, len);
         }

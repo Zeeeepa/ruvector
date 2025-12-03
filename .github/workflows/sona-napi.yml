@@ -86,19 +86,23 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y musl-tools
 
-      - name: Install dependencies
+      - name: Install napi-rs CLI
+        run: npm install -g @napi-rs/cli
+
+      - name: Install dev dependencies only
         working-directory: npm/packages/sona
-        run: npm install
+        run: npm install --ignore-optional --no-save @napi-rs/cli
 
       - name: Build native module
         working-directory: npm/packages/sona
         env:
           CARGO_BUILD_TARGET: ${{ matrix.target }}
         run: |
-          npm run build -- --target ${{ matrix.target }}
+          npx napi build --platform --release --cargo-cwd ../../../crates/sona --features napi --target ${{ matrix.target }}
 
       - name: List built files
         working-directory: npm/packages/sona
+        shell: bash
         run: ls -la *.node || echo "No .node files"
 
       - name: Upload artifact
@@ -173,183 +177,117 @@ jobs:
         working-directory: npm/packages/sona
         run: |
           # Copy all .node files from artifacts to the package directory
-          cp ../../../artifacts/bindings-x86_64-unknown-linux-gnu/*.node . || true
-          cp ../../../artifacts/bindings-x86_64-unknown-linux-musl/*.node . || true
-          cp ../../../artifacts/bindings-aarch64-unknown-linux-gnu/*.node . || true
-          cp ../../../artifacts/bindings-x86_64-apple-darwin/*.node . || true
-          cp ../../../artifacts/bindings-aarch64-apple-darwin/*.node . || true
-          cp ../../../artifacts/bindings-x86_64-pc-windows-msvc/*.node . || true
-          cp ../../../artifacts/bindings-aarch64-pc-windows-msvc/*.node . || true
-          cp ../../../artifacts/bindings-darwin-universal/*.node . || true
+          cp ../../../artifacts/bindings-x86_64-unknown-linux-gnu/*.node . 2>/dev/null || true
+          cp ../../../artifacts/bindings-x86_64-unknown-linux-musl/*.node . 2>/dev/null || true
+          cp ../../../artifacts/bindings-aarch64-unknown-linux-gnu/*.node . 2>/dev/null || true
+          cp ../../../artifacts/bindings-x86_64-apple-darwin/*.node . 2>/dev/null || true
+          cp ../../../artifacts/bindings-aarch64-apple-darwin/*.node . 2>/dev/null || true
+          cp ../../../artifacts/bindings-x86_64-pc-windows-msvc/*.node . 2>/dev/null || true
+          cp ../../../artifacts/bindings-aarch64-pc-windows-msvc/*.node . 2>/dev/null || true
+          cp ../../../artifacts/bindings-darwin-universal/*.node . 2>/dev/null || true
 
           echo "=== .node files in package ==="
           ls -la *.node
 
-      - name: Install napi-rs CLI
-        run: npm install -g @napi-rs/cli
-
-      - name: Install dependencies
-        working-directory: npm/packages/sona
-        run: npm install
-
-      - name: Prepare npm packages
-        working-directory: npm/packages/sona
-        run: |
-          # Generate platform-specific packages using napi prepublish
-          napi prepublish -t npm --skip-gh-release
-
-          echo "=== Generated npm packages ==="
-          ls -la npm/ || echo "No npm directory"
-
-      - name: Create platform package.json files
-        working-directory: npm/packages/sona
-        run: |
-          VERSION=$(node -p "require('./package.json').version")
-          echo "Version: $VERSION"
-
-          # Create npm directory if it doesn't exist
-          mkdir -p npm
-
-          # Linux x64 GNU
-          if [ -f "sona.linux-x64-gnu.node" ]; then
-            mkdir -p npm/linux-x64-gnu
-            cp sona.linux-x64-gnu.node npm/linux-x64-gnu/
-            cat > npm/linux-x64-gnu/package.json << EOF
-          {
-            "name": "@ruvector/sona-linux-x64-gnu",
-            "version": "$VERSION",
-            "os": ["linux"],
-            "cpu": ["x64"],
-            "main": "sona.linux-x64-gnu.node",
-            "files": ["sona.linux-x64-gnu.node"],
-            "license": "MIT OR Apache-2.0",
-            "repository": {
-              "type": "git",
-              "url": "https://github.com/ruvnet/ruvector.git"
-            }
-          }
-          EOF
-          fi
-
-          # Linux x64 MUSL
-          if [ -f "sona.linux-x64-musl.node" ]; then
-            mkdir -p npm/linux-x64-musl
-            cp sona.linux-x64-musl.node npm/linux-x64-musl/
-            cat > npm/linux-x64-musl/package.json << EOF
-          {
-            "name": "@ruvector/sona-linux-x64-musl",
-            "version": "$VERSION",
-            "os": ["linux"],
-            "cpu": ["x64"],
-            "main": "sona.linux-x64-musl.node",
-            "files": ["sona.linux-x64-musl.node"],
-            "libc": ["musl"],
-            "license": "MIT OR Apache-2.0"
-          }
-          EOF
-          fi
-
-          # Linux ARM64
-          if [ -f "sona.linux-arm64-gnu.node" ]; then
-            mkdir -p npm/linux-arm64-gnu
-            cp sona.linux-arm64-gnu.node npm/linux-arm64-gnu/
-            cat > npm/linux-arm64-gnu/package.json << EOF
-          {
-            "name": "@ruvector/sona-linux-arm64-gnu",
-            "version": "$VERSION",
-            "os": ["linux"],
-            "cpu": ["arm64"],
-            "main": "sona.linux-arm64-gnu.node",
-            "files": ["sona.linux-arm64-gnu.node"],
-            "license": "MIT OR Apache-2.0"
-          }
-          EOF
-          fi
-
-          # macOS x64
-          if [ -f "sona.darwin-x64.node" ]; then
-            mkdir -p npm/darwin-x64
-            cp sona.darwin-x64.node npm/darwin-x64/
-            cat > npm/darwin-x64/package.json << EOF
-          {
-            "name": "@ruvector/sona-darwin-x64",
-            "version": "$VERSION",
-            "os": ["darwin"],
-            "cpu": ["x64"],
-            "main": "sona.darwin-x64.node",
-            "files": ["sona.darwin-x64.node"],
-            "license": "MIT OR Apache-2.0"
-          }
-          EOF
-          fi
-
-          # macOS ARM64
-          if [ -f "sona.darwin-arm64.node" ]; then
-            mkdir -p npm/darwin-arm64
-            cp sona.darwin-arm64.node npm/darwin-arm64/
-            cat > npm/darwin-arm64/package.json << EOF
-          {
-            "name": "@ruvector/sona-darwin-arm64",
-            "version": "$VERSION",
-            "os": ["darwin"],
-            "cpu": ["arm64"],
-            "main": "sona.darwin-arm64.node",
-            "files": ["sona.darwin-arm64.node"],
-            "license": "MIT OR Apache-2.0"
-          }
-          EOF
-          fi
-
-          # Windows x64
-          if [ -f "sona.win32-x64-msvc.node" ]; then
-            mkdir -p npm/win32-x64-msvc
-            cp sona.win32-x64-msvc.node npm/win32-x64-msvc/
-            cat > npm/win32-x64-msvc/package.json << EOF
-          {
-            "name": "@ruvector/sona-win32-x64-msvc",
-            "version": "$VERSION",
-            "os": ["win32"],
-            "cpu": ["x64"],
-            "main": "sona.win32-x64-msvc.node",
-            "files": ["sona.win32-x64-msvc.node"],
-            "license": "MIT OR Apache-2.0"
-          }
-          EOF
-          fi
-
-          # Windows ARM64
-          if [ -f "sona.win32-arm64-msvc.node" ]; then
-            mkdir -p npm/win32-arm64-msvc
-            cp sona.win32-arm64-msvc.node npm/win32-arm64-msvc/
-            cat > npm/win32-arm64-msvc/package.json << EOF
-          {
-            "name": "@ruvector/sona-win32-arm64-msvc",
-            "version": "$VERSION",
-            "os": ["win32"],
-            "cpu": ["arm64"],
-            "main": "sona.win32-arm64-msvc.node",
-            "files": ["sona.win32-arm64-msvc.node"],
-            "license": "MIT OR Apache-2.0"
-          }
-          EOF
-          fi
-
-          echo "=== Platform packages created ==="
-          ls -la npm/
-
-      - name: Publish platform packages
+      - name: Create and publish platform packages
         working-directory: npm/packages/sona
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          for dir in npm/*/; do
-            if [ -d "$dir" ]; then
-              echo "Publishing $dir..."
-              cd "$dir"
-              npm publish --access public || echo "Warning: Failed to publish $dir (may already exist)"
+          VERSION=$(node -p "require('./package.json').version")
+          echo "Publishing version: $VERSION"
+
+          # Create npm directory
+          mkdir -p npm
+
+          # Function to create and publish platform package
+          publish_platform() {
+            local name=$1
+            local node_file=$2
+            local os_val=$3
+            local cpu_val=$4
+            local libc_val=$5
+
+            if [ -f "$node_file" ]; then
+              local dir_name=$(echo "$name" | sed 's/@ruvector\/sona-//')
+              mkdir -p "npm/$dir_name"
+              cp "$node_file" "npm/$dir_name/"
+
+              if [ -n "$libc_val" ]; then
+                cat > "npm/$dir_name/package.json" << PKGJSON
+{
+  "name": "$name",
+  "version": "$VERSION",
+  "os": ["$os_val"],
+  "cpu": ["$cpu_val"],
+  "libc": ["$libc_val"],
+  "main": "$node_file",
+  "files": ["$node_file"],
+  "license": "MIT OR Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ruvnet/ruvector.git"
+  }
+}
+PKGJSON
+              else
+                cat > "npm/$dir_name/package.json" << PKGJSON
+{
+  "name": "$name",
+  "version": "$VERSION",
+  "os": ["$os_val"],
+  "cpu": ["$cpu_val"],
+  "main": "$node_file",
+  "files": ["$node_file"],
+  "license": "MIT OR Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ruvnet/ruvector.git"
+  }
+}
+PKGJSON
+              fi
+
+              echo "Publishing $name..."
+              cd "npm/$dir_name"
+              npm publish --access public || echo "Warning: $name may already exist"
               cd ../..
             fi
-          done
+          }
+
+          # Publish all platform packages
+          publish_platform "@ruvector/sona-linux-x64-gnu" "sona.linux-x64-gnu.node" "linux" "x64" ""
+          publish_platform "@ruvector/sona-linux-x64-musl" "sona.linux-x64-musl.node" "linux" "x64" "musl"
+          publish_platform "@ruvector/sona-linux-arm64-gnu" "sona.linux-arm64-gnu.node" "linux" "arm64" ""
+          publish_platform "@ruvector/sona-darwin-x64" "sona.darwin-x64.node" "darwin" "x64" ""
+          publish_platform "@ruvector/sona-darwin-arm64" "sona.darwin-arm64.node" "darwin" "arm64" ""
+          publish_platform "@ruvector/sona-win32-x64-msvc" "sona.win32-x64-msvc.node" "win32" "x64" ""
+          publish_platform "@ruvector/sona-win32-arm64-msvc" "sona.win32-arm64-msvc.node" "win32" "arm64" ""
+
+          echo "=== Platform packages published ==="
+
+      - name: Update main package with optionalDependencies
+        working-directory: npm/packages/sona
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+
+          # Add optionalDependencies to package.json
+          node -e "
+            const pkg = require('./package.json');
+            pkg.optionalDependencies = {
+              '@ruvector/sona-linux-x64-gnu': '$VERSION',
+              '@ruvector/sona-linux-x64-musl': '$VERSION',
+              '@ruvector/sona-linux-arm64-gnu': '$VERSION',
+              '@ruvector/sona-darwin-x64': '$VERSION',
+              '@ruvector/sona-darwin-arm64': '$VERSION',
+              '@ruvector/sona-win32-x64-msvc': '$VERSION',
+              '@ruvector/sona-win32-arm64-msvc': '$VERSION'
+            };
+            require('fs').writeFileSync('./package.json', JSON.stringify(pkg, null, 2) + '\n');
+          "
+
+          echo "=== Updated package.json ==="
+          cat package.json
 
       - name: Publish main package
         working-directory: npm/packages/sona

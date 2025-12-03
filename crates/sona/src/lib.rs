@@ -53,9 +53,6 @@ pub mod reasoning_bank;
 pub mod loops;
 pub mod engine;
 
-#[cfg(feature = "serde-support")]
-pub mod export;
-
 #[cfg(feature = "wasm")]
 pub mod wasm;
 
@@ -73,13 +70,6 @@ pub use ewc::{EwcConfig, EwcPlusPlus, TaskFisher};
 pub use reasoning_bank::{ReasoningBank, PatternConfig};
 pub use loops::{InstantLoop, BackgroundLoop, LoopCoordinator};
 pub use engine::SonaEngine;
-
-#[cfg(feature = "serde-support")]
-pub use export::{
-    HuggingFaceExporter, ExportConfig, ExportResult, ExportError, ExportType,
-    SafeTensorsExporter, DatasetExporter, HuggingFaceHub,
-    PretrainConfig, PretrainPipeline,
-};
 
 #[cfg(feature = "wasm")]
 pub use wasm::WasmSonaEngine;
