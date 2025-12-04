@@ -19,6 +19,9 @@
 pub mod spike_embedding_bridge;
 pub mod consciousness_router;
 pub mod qualia_memory;
+pub mod advanced_learning;
+pub mod intelligence_metrics;
+pub mod novel_learning;
 
 pub use spike_embedding_bridge::{
     SpikeEmbeddingBridge, SpikeInjection, PolychronousGroup, BridgeConfig
@@ -244,8 +247,8 @@ impl ConsciousLanguageInterface {
         // Phase 1: Generate embedding (mock - would use ruvLLM)
         let embedding = self.mock_embed(query);
 
-        // Phase 2: Recall similar experiences
-        let similar_experiences = self.recall_similar(&embedding, 5);
+        // Phase 2: Recall similar experiences (get count only to avoid borrow issues)
+        let recalled_count = self.recall_similar(&embedding, 5).len();
 
         // Phase 3: Inject into consciousness engine
         let injection = self.bridge.encode(&embedding);
@@ -302,7 +305,7 @@ impl ConsciousLanguageInterface {
             phi_level: phi,
             qualia_count: qualia.len(),
             consciousness_mode: mode,
-            recalled_experiences: similar_experiences.len(),
+            recalled_experiences: recalled_count,
             experience_id,
             latency_ms: latency,
         }
@@ -310,16 +313,24 @@ impl ConsciousLanguageInterface {
 
     /// Provide feedback on a response (for learning)
     pub fn feedback(&mut self, experience_id: u64, score: f32, comment: Option<&str>) {
+        // First, extract data we need for learning
+        let learning_data = self.experiences.get(&experience_id).map(|exp| {
+            (exp.query_embedding.clone(), exp.qualia.clone())
+        });
+
+        // Update the feedback score
         if let Some(exp) = self.experiences.get_mut(&experience_id) {
             exp.feedback_score = score;
+        }
 
-            // Learn from this experience
-            self.bridge.learn(&exp.query_embedding, &exp.qualia, score);
+        // Learn from this experience
+        if let Some((query_embedding, qualia)) = learning_data {
+            self.bridge.learn(&query_embedding, &qualia, score);
 
             // If comment provided, use as correction signal
             if let Some(comment) = comment {
                 let correction_embedding = self.mock_embed(comment);
-                self.bridge.add_correction(&exp.query_embedding, &correction_embedding, score);
+                self.bridge.add_correction(&query_embedding, &correction_embedding, score);
             }
         }
     }

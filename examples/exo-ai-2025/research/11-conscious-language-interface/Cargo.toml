@@ -9,26 +9,27 @@ repository = "https://github.com/ruvnet/ruvector"
 keywords = ["consciousness", "llm", "neuromorphic", "spiking-neural-networks", "ai"]
 categories = ["science", "simulation"]
 
+# Standalone workspace
+[workspace]
+
 [dependencies]
-# Would depend on actual crates when integrated
-# ruvllm = { path = "../../../../examples/ruvLLM" }
-# sona = { path = "../../../../crates/sona" }
-# ruvector-core = { path = "../../../../crates/ruvector-core" }
 
 [dev-dependencies]
+criterion = "0.5"
 
 [features]
 default = []
 simd = []  # SIMD acceleration
-cuda = []  # GPU acceleration
-full-consciousness = []  # Enable all consciousness features
 
-[[bin]]
-name = "cli-demo"
-path = "src/bin/demo.rs"
-required-features = []
+[[bench]]
+name = "consciousness_bench"
+harness = false
 
 [profile.release]
 opt-level = 3
 lto = true
 codegen-units = 1
+
+[profile.bench]
+opt-level = 3
+lto = true

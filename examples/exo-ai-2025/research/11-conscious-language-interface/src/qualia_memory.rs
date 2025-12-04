@@ -233,17 +233,21 @@ impl QualiaReasoningBank {
         // Record Φ
         self.phi_history.record(qualia.phi_level);
 
-        // Check if similar pattern exists
-        let similar = self.find_similar(&qualia.embedding, 1);
-        if let Some(existing) = similar.first() {
-            if existing.similarity_to_embedding(&qualia.embedding) > self.merge_threshold {
-                // Merge with existing pattern
-                if let Some(pattern) = self.patterns.get_mut(&existing.id) {
-                    pattern.occurrence_count += 1;
-                    pattern.quality = (pattern.quality + qualia.quality) / 2.0;
-                    pattern.last_accessed = Instant::now();
-                    return existing.id;
-                }
+        // Check if similar pattern exists - collect IDs to avoid borrow issues
+        let existing_id = {
+            let similar = self.find_similar(&qualia.embedding, 1);
+            similar.first()
+                .filter(|p| p.similarity_to_embedding(&qualia.embedding) > self.merge_threshold)
+                .map(|p| p.id)
+        };
+
+        if let Some(existing_id) = existing_id {
+            // Merge with existing pattern
+            if let Some(pattern) = self.patterns.get_mut(&existing_id) {
+                pattern.occurrence_count += 1;
+                pattern.quality = (pattern.quality + qualia.quality) / 2.0;
+                pattern.last_accessed = Instant::now();
+                return existing_id;
             }
         }
 
@@ -335,7 +339,9 @@ impl QualiaReasoningBank {
     pub fn consolidate(&mut self) {
         let pattern_ids: Vec<u64> = self.patterns.keys().cloned().collect();
         let mut merged = Vec::new();
+        let mut merge_actions: Vec<(u64, u64, u32, f32, Vec<f32>)> = Vec::new();
 
+        // First pass: identify patterns to merge
         for i in 0..pattern_ids.len() {
             for j in (i + 1)..pattern_ids.len() {
                 let id1 = pattern_ids[i];
@@ -350,17 +356,30 @@ impl QualiaReasoningBank {
 
                 if let (Some(p1), Some(p2)) = (p1, p2) {
                     if p1.similarity(p2) > self.merge_threshold {
-                        // Merge p2 into p1
-                        if let Some(pattern) = self.patterns.get_mut(&id1) {
-                            pattern.occurrence_count += p2.occurrence_count;
-                            pattern.quality = (pattern.quality + p2.quality) / 2.0;
-
-                            // Merge embeddings (weighted average)
-                            for (i, e) in pattern.embedding.iter_mut().enumerate() {
-                                *e = (*e + p2.embedding[i]) / 2.0;
-                            }
-                        }
+                        // Record merge action
+                        merge_actions.push((
+                            id1,
+                            id2,
+                            p2.occurrence_count,
+                            p2.quality,
+                            p2.embedding.clone(),
+                        ));
                         merged.push(id2);
+                    }
+                }
+            }
+        }
+
+        // Second pass: apply merges
+        for (id1, _id2, occ_count, quality, embedding) in merge_actions {
+            if let Some(pattern) = self.patterns.get_mut(&id1) {
+                pattern.occurrence_count += occ_count;
+                pattern.quality = (pattern.quality + quality) / 2.0;
+
+                // Merge embeddings (weighted average)
+                for (i, e) in pattern.embedding.iter_mut().enumerate() {
+                    if i < embedding.len() {
+                        *e = (*e + embedding[i]) / 2.0;
                     }
                 }
             }
