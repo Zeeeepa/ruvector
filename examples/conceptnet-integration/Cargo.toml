@@ -97,6 +97,10 @@ path = "src/bin/ruvector_conceptnet.rs"
 name = "ruvector-deep"
 path = "src/bin/ruvector_deep.rs"
 
+[[bin]]
+name = "ruvector-pq"
+path = "src/bin/ruvector_pq.rs"
+
 [[bench]]
 name = "conceptnet_benchmarks"
 harness = false
