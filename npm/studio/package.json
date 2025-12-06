@@ -1,0 +1,28 @@
+{
+  "name": "@ruvector/studio",
+  "version": "0.1.0",
+  "description": "RuVector Studio - Custom Supabase Studio with AI-native vector database features",
+  "author": "RuVector",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ruvnet/ruvector.git",
+    "directory": "npm/studio"
+  },
+  "keywords": [
+    "ruvector",
+    "supabase",
+    "studio",
+    "postgresql",
+    "vector-database",
+    "ai-native"
+  ],
+  "files": [
+    "components/",
+    "pages/",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

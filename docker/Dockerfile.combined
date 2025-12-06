@@ -3,7 +3,7 @@
 # This Dockerfile creates an all-in-one image for Cloud Run deployment:
 # - PostgreSQL 17 with RuVector extension
 # - pg-meta API for database management
-# - Supabase Studio frontend
+# - Custom Supabase Studio frontend with RuVector pages
 # - Nginx reverse proxy with basic authentication
 #
 # Usage:
@@ -63,7 +63,52 @@ RUN cargo pgrx package --pg-config /usr/lib/postgresql/${PG_VERSION}/bin/pg_conf
 RUN cp sql/ruvector--0.1.0.sql target/release/ruvector-pg${PG_VERSION}/usr/share/postgresql/${PG_VERSION}/extension/
 
 # =============================================================================
-# Stage 2: Final Combined Image
+# Stage 2: Build Custom Studio with RuVector modifications
+# =============================================================================
+FROM node:20-bookworm AS studio-builder
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git \
+    python3 \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /build
+
+# Clone Supabase repository at the specific version
+RUN git clone --depth 1 --branch v1.24.09 https://github.com/supabase/supabase.git .
+
+# Copy all our custom RuVector modifications from npm/studio
+COPY npm/studio/components/interfaces/RuVector /tmp/ruvector-components/
+COPY npm/studio/pages/project /tmp/ruvector-pages/
+
+# Move files to correct locations
+RUN mkdir -p apps/studio/components/interfaces/RuVector && \
+    cp /tmp/ruvector-components/RuVectorHome.tsx apps/studio/components/interfaces/RuVector/ && \
+    cp /tmp/ruvector-pages/\[ref\]/index.tsx apps/studio/pages/project/\[ref\]/index.tsx && \
+    mkdir -p apps/studio/pages/project/\[ref\]/vectors && \
+    mkdir -p apps/studio/pages/project/\[ref\]/attention && \
+    mkdir -p apps/studio/pages/project/\[ref\]/gnn && \
+    mkdir -p apps/studio/pages/project/\[ref\]/hyperbolic && \
+    mkdir -p apps/studio/pages/project/\[ref\]/learning && \
+    mkdir -p apps/studio/pages/project/\[ref\]/routing && \
+    cp /tmp/ruvector-pages/\[ref\]/vectors/index.tsx apps/studio/pages/project/\[ref\]/vectors/ && \
+    cp /tmp/ruvector-pages/\[ref\]/attention/index.tsx apps/studio/pages/project/\[ref\]/attention/ && \
+    cp /tmp/ruvector-pages/\[ref\]/gnn/index.tsx apps/studio/pages/project/\[ref\]/gnn/ && \
+    cp /tmp/ruvector-pages/\[ref\]/hyperbolic/index.tsx apps/studio/pages/project/\[ref\]/hyperbolic/ && \
+    cp /tmp/ruvector-pages/\[ref\]/learning/index.tsx apps/studio/pages/project/\[ref\]/learning/ && \
+    cp /tmp/ruvector-pages/\[ref\]/routing/index.tsx apps/studio/pages/project/\[ref\]/routing/ && \
+    rm -rf /tmp/ruvector-components /tmp/ruvector-pages
+
+# Install dependencies and build
+RUN npm install
+ENV SKIP_ASSET_UPLOAD=1
+ENV NEXT_PUBLIC_IS_PLATFORM=false
+RUN npm run build:studio
+
+# =============================================================================
+# Stage 3: Final Combined Image
 # =============================================================================
 FROM postgres:${PG_VERSION}-bookworm AS runtime
 
@@ -90,9 +135,15 @@ RUN mkdir -p /etc/apt/keyrings && \
     apt-get install -y nodejs && \
     rm -rf /var/lib/apt/lists/*
 
-# Copy RuVector extension
+# Copy RuVector extension from rust-builder
 COPY --from=rust-builder /build/ruvector-postgres/target/release/ruvector-pg${PG_VERSION}/usr/share/postgresql/${PG_VERSION}/extension/* /usr/share/postgresql/${PG_VERSION}/extension/
 COPY --from=rust-builder /build/ruvector-postgres/target/release/ruvector-pg${PG_VERSION}/usr/lib/postgresql/${PG_VERSION}/lib/* /usr/lib/postgresql/${PG_VERSION}/lib/
+
+# Copy built Studio from studio-builder
+RUN mkdir -p /app/studio
+COPY --from=studio-builder /build/apps/studio/.next/standalone /app/
+COPY --from=studio-builder /build/apps/studio/.next/static /app/apps/studio/.next/static
+COPY --from=studio-builder /build/apps/studio/public /app/apps/studio/public
 
 # Install pg-meta globally
 RUN npm install -g @supabase/postgres-meta@0.84.2
@@ -214,8 +265,8 @@ stdout_logfile=/var/log/supervisor/pgmeta.log
 stderr_logfile=/var/log/supervisor/pgmeta-error.log
 
 [program:studio]
-command=node /app/studio/server.js
-directory=/app/studio
+command=node /app/apps/studio/server.js
+directory=/app
 autostart=true
 autorestart=true
 startretries=10
@@ -295,25 +346,6 @@ exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
 ENTRYPOINT
 
 RUN chmod +x /docker-entrypoint-combined.sh
-
-# Download and setup Supabase Studio
-RUN mkdir -p /app/studio && \
-    cd /tmp && \
-    curl -L https://github.com/supabase/supabase/releases/download/studio-v1.24.09/studio-standalone.tar.gz -o studio.tar.gz && \
-    tar -xzf studio.tar.gz -C /app/studio --strip-components=1 || \
-    echo "Studio download failed - will use placeholder"
-
-# Create a simple placeholder if Studio download fails
-RUN if [ ! -f /app/studio/server.js ]; then \
-    mkdir -p /app/studio && \
-    echo 'const http = require("http");' > /app/studio/server.js && \
-    echo 'const server = http.createServer((req, res) => {' >> /app/studio/server.js && \
-    echo '  res.writeHead(200, {"Content-Type": "text/html"});' >> /app/studio/server.js && \
-    echo '  res.end("<html><head><title>RuVector Studio</title></head><body style=font-family:sans-serif;padding:40px;><h1>RuVector Studio</h1><p>PostgreSQL with RuVector extension is running.</p><p><a href=/api/pg/>Database API</a></p></body></html>");' >> /app/studio/server.js && \
-    echo '});' >> /app/studio/server.js && \
-    echo 'server.listen(3000, () => console.log("Studio placeholder running on port 3000"));' >> /app/studio/server.js && \
-    echo "Created placeholder server"; \
-    fi
 
 # Expose port for Cloud Run
 EXPOSE 8080

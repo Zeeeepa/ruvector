@@ -25,10 +25,10 @@ WORKDIR /build
 # Clone Supabase repository at the specific version
 RUN git clone --depth 1 --branch v1.24.09 https://github.com/supabase/supabase.git .
 
-# Copy all our custom RuVector modifications in one layer
+# Copy all our custom RuVector modifications from npm/studio
 # Using a staging directory to handle the bracket paths
-COPY studio/components/interfaces/RuVector /tmp/ruvector-components/
-COPY studio/pages/project /tmp/ruvector-pages/
+COPY npm/studio/components/interfaces/RuVector /tmp/ruvector-components/
+COPY npm/studio/pages/project /tmp/ruvector-pages/
 
 # Move files to correct locations
 RUN mkdir -p apps/studio/components/interfaces/RuVector && \
