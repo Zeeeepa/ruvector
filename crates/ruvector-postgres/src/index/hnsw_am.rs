@@ -547,6 +547,11 @@ static HNSW_AM_HANDLER: IndexAmRoutine = IndexAmRoutine {
     amestimateparallelscan: None,
     aminitparallelscan: None,
     amparallelrescan: None,
+    // PG17 additions
+    #[cfg(any(feature = "pg17"))]
+    amcanbuildparallel: false,
+    #[cfg(any(feature = "pg17"))]
+    aminsertcleanup: None,
 };
 
 /// Main handler function for HNSW index access method
