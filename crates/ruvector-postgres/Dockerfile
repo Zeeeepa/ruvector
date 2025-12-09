@@ -34,20 +34,18 @@ RUN cargo install cargo-pgrx --version 0.12.9 --locked
 # Set up workspace
 WORKDIR /build
 
-# Copy only Cargo files first for better layer caching
-COPY Cargo.toml Cargo.lock ./
-COPY crates/ruvector-postgres/Cargo.toml ./crates/ruvector-postgres/
+# Create a minimal standalone Cargo.toml for ruvector-postgres
+# (not the workspace version)
+COPY crates/ruvector-postgres/ ./
 
-# Copy source code
-COPY crates/ruvector-postgres ./crates/ruvector-postgres/
+# Use the workspace Cargo.lock to pin dependencies and avoid registry parsing issues
+COPY Cargo.lock ./
 
 # Initialize pgrx with system PostgreSQL
-RUN cd crates/ruvector-postgres && \
-    cargo pgrx init --pg17=/usr/lib/postgresql/17/bin/pg_config
+RUN cargo pgrx init --pg17=/usr/lib/postgresql/17/bin/pg_config
 
 # Build the extension with all features including embeddings
-RUN cd crates/ruvector-postgres && \
-    cargo pgrx package --features "pg17 index-all quant-all embeddings"
+RUN cargo pgrx package --features "pg17 index-all quant-all embeddings"
 
 # Runtime stage
 FROM postgres:17-bookworm
@@ -64,9 +62,9 @@ COPY --from=builder /build/target/release/ruvector-postgres-pg17/usr/lib/postgre
     /usr/lib/postgresql/17/lib/
 
 # Copy SQL files and control file
-COPY --from=builder /build/crates/ruvector-postgres/ruvector.control \
+COPY --from=builder /build/ruvector.control \
     /usr/share/postgresql/17/extension/
-COPY --from=builder /build/crates/ruvector-postgres/sql/*.sql \
+COPY --from=builder /build/sql/*.sql \
     /usr/share/postgresql/17/extension/
 
 # Add initialization script to create extension
