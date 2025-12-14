@@ -1,464 +1,427 @@
 {
-  "title": "Neural Trader System Input",
+  "title": "Neural Trader System",
+  "description": "AI-powered trading signals, portfolio optimization, and risk management with 9 specialized trading modes",
   "type": "object",
   "schemaVersion": 1,
   "properties": {
     "mode": {
       "title": "Trading Mode",
       "type": "string",
-      "description": "Select the trading operation mode",
-      "enum": [
-        "signals",
-        "optimize",
-        "analyze",
-        "train",
-        "live",
-        "backtest",
-        "sports_betting",
-        "prediction_markets",
-        "arbitrage"
-      ],
+      "description": "Select the trading operation mode. Each mode provides specialized analysis and outputs.",
+      "enum": ["signals", "optimize", "analyze", "train", "live", "backtest", "sports_betting", "prediction_markets", "arbitrage"],
       "enumTitles": [
-        "📊 Generate Trading Signals",
-        "💼 Optimize Portfolio",
-        "🔍 Deep Market Analysis",
-        "🧠 Train Neural Model",
-        "💰 Live Trading (Alpaca)",
-        "📈 Backtest Strategy (Monte Carlo)",
-        "🏈 Sports Betting (Kelly Criterion)",
-        "🔮 Prediction Markets (Polymarket)",
-        "💱 Arbitrage Detection (Cross-Exchange)"
+        "Generate Trading Signals - Buy/Sell/Hold with confidence scores",
+        "Optimize Portfolio - Markowitz & Kelly Criterion allocation",
+        "Deep Market Analysis - 40+ patterns, Fibonacci, indicators",
+        "Train Neural Model - Gradient descent with early stopping",
+        "Live Trading - Alpaca API paper/live execution",
+        "Backtest Strategy - Monte Carlo simulation with CI",
+        "Sports Betting - Kelly Criterion with The Odds API",
+        "Prediction Markets - Polymarket CLOB analysis",
+        "Arbitrage Detection - Cross-exchange crypto & DeFi"
       ],
       "default": "signals",
+      "prefill": "signals",
       "editor": "select",
       "sectionCaption": "Core Settings",
-      "sectionDescription": "Essential configuration for all trading modes"
+      "sectionDescription": "Essential configuration for all trading modes. Select your trading mode, symbols, and neural network strategy."
     },
     "symbols": {
       "title": "Trading Symbols",
       "type": "array",
-      "description": "List of trading symbols (e.g., BTC/USD, AAPL, EUR/USD). Supports stocks, crypto, forex.",
+      "description": "Enter trading symbols to analyze. Supports stocks (AAPL, TSLA), crypto (BTC/USD, ETH/USD), forex (EUR/USD), and indices (SPY).",
       "editor": "stringList",
       "default": ["BTC/USD", "ETH/USD", "AAPL", "TSLA"],
       "prefill": ["BTC/USD", "ETH/USD", "AAPL", "TSLA"],
       "minItems": 1,
-      "maxItems": 100
+      "maxItems": 50
     },
     "strategy": {
       "title": "Neural Strategy",
       "type": "string",
-      "description": "Select the neural network trading strategy",
-      "enum": [
-        "neural_momentum",
-        "lstm_prediction",
-        "transformer_attention",
-        "ensemble",
-        "reinforcement"
-      ],
+      "description": "Choose the neural network architecture for predictions. Ensemble combines all strategies for highest accuracy.",
+      "enum": ["neural_momentum", "lstm_prediction", "transformer_attention", "ensemble", "reinforcement"],
       "enumTitles": [
-        "⚡ Neural Momentum - Fast pattern recognition (<10ms)",
-        "📉 LSTM Prediction - Time series forecasting (~50ms)",
-        "🎯 Transformer Attention - Multi-head analysis (~100ms)",
-        "🏆 Ensemble - Combined predictions, highest accuracy (~200ms)",
-        "🤖 Reinforcement Learning - Adaptive strategy (~80ms)"
+        "Neural Momentum - Fast pattern recognition, <10ms latency",
+        "LSTM Prediction - Time series forecasting, ~50ms latency",
+        "Transformer Attention - Multi-head analysis, ~100ms latency",
+        "Ensemble (Recommended) - Combined predictions, highest accuracy",
+        "Reinforcement Learning - Adaptive strategy optimization"
       ],
       "default": "ensemble",
+      "prefill": "ensemble",
       "editor": "select"
     },
     "riskProfile": {
       "title": "Risk Profile",
       "type": "string",
-      "description": "Risk tolerance level for position sizing and stop-loss",
-      "enum": [
-        "conservative",
-        "moderate",
-        "aggressive",
-        "custom"
-      ],
+      "description": "Set your risk tolerance level. This affects position sizing, stop-loss placement, and signal filtering.",
+      "enum": ["conservative", "moderate", "aggressive", "custom"],
       "enumTitles": [
-        "🛡️ Conservative - Low risk, tight stops (2% max loss)",
-        "⚖️ Moderate - Balanced risk/reward (5% max loss)",
-        "🔥 Aggressive - Higher risk, wider stops (10% max loss)",
-        "⚙️ Custom - Manual configuration"
+        "Conservative - Low risk, 2% max loss per trade, tight stops",
+        "Moderate (Recommended) - Balanced risk/reward, 5% max loss",
+        "Aggressive - Higher risk, 10% max loss, wider stops",
+        "Custom - Use manual configuration below"
       ],
       "default": "moderate",
+      "prefill": "moderate",
       "editor": "select",
       "sectionCaption": "Risk Management",
-      "sectionDescription": "Configure position sizing, stop-loss, and risk tolerance"
+      "sectionDescription": "Configure position sizing, stop-loss levels, and risk tolerance. These settings protect your capital."
     },
     "maxPositionSize": {
       "title": "Max Position Size (%)",
-      "type": "number",
-      "description": "Maximum position size as percentage of portfolio (1-100%)",
+      "type": "integer",
+      "description": "Maximum allocation per position as percentage of portfolio. Lower values reduce concentration risk.",
       "minimum": 1,
       "maximum": 100,
       "default": 10,
+      "prefill": 10,
       "editor": "number"
     },
     "stopLoss": {
       "title": "Stop Loss (%)",
       "type": "number",
-      "description": "Stop loss percentage from entry price (0.1-50%)",
-      "minimum": 0.1,
-      "maximum": 50,
+      "description": "Automatic exit when price drops by this percentage from entry. Protects against large losses.",
+      "minimum": 0.5,
+      "maximum": 25,
       "default": 2.5,
+      "prefill": 2.5,
       "editor": "number"
     },
     "takeProfit": {
       "title": "Take Profit (%)",
       "type": "number",
-      "description": "Take profit percentage from entry price (0.1-200%)",
-      "minimum": 0.1,
-      "maximum": 200,
+      "description": "Automatic exit when price rises by this percentage from entry. Locks in gains.",
+      "minimum": 1,
+      "maximum": 100,
       "default": 5,
+      "prefill": 5,
       "editor": "number"
     },
     "trailingStop": {
       "title": "Trailing Stop (%)",
       "type": "number",
-      "description": "Trailing stop percentage (0 = disabled)",
+      "description": "Dynamic stop that follows price upward. Set to 0 to disable. Helps capture extended moves.",
       "minimum": 0,
-      "maximum": 20,
+      "maximum": 15,
       "default": 0,
+      "prefill": 0,
       "editor": "number"
     },
     "maxDrawdown": {
-      "title": "Max Drawdown (%)",
-      "type": "number",
-      "description": "Maximum portfolio drawdown before stopping (0 = disabled)",
+      "title": "Max Portfolio Drawdown (%)",
+      "type": "integer",
+      "description": "Stop all trading if portfolio drops by this percentage. Set to 0 to disable. Critical risk control.",
       "minimum": 0,
       "maximum": 50,
       "default": 15,
+      "prefill": 15,
       "editor": "number"
     },
     "timeframe": {
-      "title": "Timeframe",
+      "title": "Analysis Timeframe",
       "type": "string",
-      "description": "Candle timeframe for analysis",
-      "enum": [
-        "1m",
-        "5m",
-        "15m",
-        "1h",
-        "4h",
-        "1d",
-        "1w"
-      ],
+      "description": "Candle/bar timeframe for technical analysis. Shorter = more trades, Longer = fewer but larger moves.",
+      "enum": ["1m", "5m", "15m", "1h", "4h", "1d", "1w"],
       "enumTitles": [
-        "1 Minute - Scalping",
-        "5 Minutes - Day trading",
-        "15 Minutes - Intraday",
-        "1 Hour - Swing trading",
+        "1 Minute - Scalping, high frequency",
+        "5 Minutes - Day trading, intraday",
+        "15 Minutes - Active trading",
+        "1 Hour (Recommended) - Swing trading",
         "4 Hours - Position trading",
-        "1 Day - Long-term",
+        "1 Day - Long-term investing",
         "1 Week - Macro trends"
       ],
       "default": "1h",
+      "prefill": "1h",
       "editor": "select",
-      "sectionCaption": "Analysis Settings",
-      "sectionDescription": "Configure timeframes, lookback periods, and confidence thresholds"
+      "sectionCaption": "Analysis Configuration",
+      "sectionDescription": "Configure timeframes, data sources, and confidence thresholds for market analysis."
     },
     "lookbackPeriod": {
-      "title": "Lookback Period",
+      "title": "Lookback Period (Candles)",
       "type": "integer",
-      "description": "Number of historical candles for analysis (10-1000)",
-      "minimum": 10,
-      "maximum": 1000,
+      "description": "Number of historical candles to analyze. More data = better pattern recognition but slower.",
+      "minimum": 20,
+      "maximum": 500,
       "default": 100,
+      "prefill": 100,
       "editor": "number"
     },
     "confidenceThreshold": {
       "title": "Minimum Confidence (%)",
-      "type": "number",
-      "description": "Minimum confidence level to generate signals (0-100%)",
-      "minimum": 0,
-      "maximum": 100,
+      "type": "integer",
+      "description": "Only generate signals above this confidence level. Higher = fewer but stronger signals.",
+      "minimum": 50,
+      "maximum": 99,
       "default": 70,
+      "prefill": 70,
       "editor": "number"
     },
     "dataSource": {
-      "title": "Data Source",
+      "title": "Market Data Source",
       "type": "string",
-      "description": "Market data provider for price feeds",
-      "enum": [
-        "auto",
-        "yahoo",
-        "alpha_vantage",
-        "polygon",
-        "binance",
-        "coinbase"
-      ],
+      "description": "Select price data provider. Auto-detect chooses best source based on symbol type.",
+      "enum": ["auto", "yahoo", "alpha_vantage", "polygon", "binance", "coinbase"],
       "enumTitles": [
-        "Auto-detect (Recommended)",
-        "Yahoo Finance (Stocks/ETFs)",
-        "Alpha Vantage (Stocks/Forex)",
-        "Polygon.io (Stocks/Options)",
-        "Binance (Crypto)",
-        "Coinbase (Crypto)"
+        "Auto-detect (Recommended) - Best source per symbol",
+        "Yahoo Finance - Stocks, ETFs, indices",
+        "Alpha Vantage - Stocks, forex (API key needed)",
+        "Polygon.io - Stocks, options (API key needed)",
+        "Binance - Cryptocurrency pairs",
+        "Coinbase - Cryptocurrency pairs"
       ],
       "default": "auto",
+      "prefill": "auto",
       "editor": "select"
     },
     "neuralLayers": {
-      "title": "Hidden Layers",
+      "title": "Neural Network Layers",
       "type": "integer",
-      "description": "Number of hidden layers in the neural network (1-10)",
+      "description": "Number of hidden layers. More layers = more complex patterns but slower training.",
       "minimum": 1,
-      "maximum": 10,
+      "maximum": 8,
       "default": 3,
+      "prefill": 3,
       "editor": "number",
-      "sectionCaption": "Neural Network Configuration",
-      "sectionDescription": "Advanced neural network architecture settings"
+      "sectionCaption": "Neural Network Architecture",
+      "sectionDescription": "Advanced settings for the neural network model. Default values are optimized for most use cases."
     },
     "neuralNeurons": {
       "title": "Neurons Per Layer",
       "type": "string",
-      "description": "Comma-separated neuron counts (e.g., 128,64,32)",
+      "description": "Comma-separated neuron counts for each layer. Example: 128,64,32 for 3 layers.",
       "default": "128,64,32",
+      "prefill": "128,64,32",
       "editor": "textfield"
     },
     "activation": {
       "title": "Activation Function",
       "type": "string",
-      "description": "Neural network activation function",
-      "enum": ["relu", "tanh", "sigmoid", "leaky_relu", "elu", "swish"],
+      "description": "Non-linear activation function between layers. ReLU is fastest, Swish is most modern.",
+      "enum": ["relu", "leaky_relu", "elu", "tanh", "sigmoid", "swish"],
       "enumTitles": [
-        "ReLU - Fast, standard choice",
-        "Tanh - Bounded output (-1 to 1)",
-        "Sigmoid - Probability output (0 to 1)",
+        "ReLU (Recommended) - Fast, standard choice",
         "Leaky ReLU - Prevents dead neurons",
         "ELU - Smooth negative values",
-        "Swish - Self-gated, modern choice"
+        "Tanh - Bounded output (-1 to 1)",
+        "Sigmoid - Probability output (0 to 1)",
+        "Swish - Self-gated, modern architecture"
       ],
       "default": "relu",
+      "prefill": "relu",
       "editor": "select"
     },
     "dropout": {
       "title": "Dropout Rate",
       "type": "number",
-      "description": "Dropout rate for regularization (0-0.9)",
+      "description": "Regularization to prevent overfitting. Higher = more regularization. Range: 0.0 to 0.5",
       "minimum": 0,
-      "maximum": 0.9,
+      "maximum": 0.5,
       "default": 0.2,
+      "prefill": 0.2,
       "editor": "number"
     },
     "learningRate": {
       "title": "Learning Rate",
       "type": "number",
-      "description": "Training learning rate (0.0001-0.1)",
+      "description": "Training step size. Too high = unstable, too low = slow. Range: 0.0001 to 0.01",
       "minimum": 0.0001,
-      "maximum": 0.1,
+      "maximum": 0.01,
       "default": 0.001,
+      "prefill": 0.001,
       "editor": "number"
     },
     "epochs": {
       "title": "Training Epochs",
       "type": "integer",
-      "description": "Number of training epochs (for train mode)",
-      "minimum": 1,
-      "maximum": 1000,
+      "description": "Number of complete passes through training data. More = better fit but risk overfitting.",
+      "minimum": 10,
+      "maximum": 500,
       "default": 100,
+      "prefill": 100,
       "editor": "number"
     },
     "batchSize": {
       "title": "Batch Size",
       "type": "integer",
-      "description": "Training batch size",
-      "minimum": 1,
-      "maximum": 512,
+      "description": "Samples per training step. Larger = faster but more memory. Powers of 2 recommended.",
+      "minimum": 8,
+      "maximum": 256,
       "default": 32,
+      "prefill": 32,
       "editor": "number"
     },
     "enableGpu": {
-      "title": "Enable GPU Acceleration",
+      "title": "GPU Acceleration",
       "type": "boolean",
-      "description": "Use GPU/WASM SIMD for faster computations",
+      "description": "Use WASM SIMD for faster computations. Recommended for large datasets.",
       "default": true,
       "editor": "checkbox"
     },
     "enableSwarm": {
       "title": "Enable Multi-Agent Swarm",
       "type": "boolean",
-      "description": "Use multiple neural agents with consensus voting for better accuracy",
+      "description": "Use multiple neural agents with consensus voting. Increases accuracy by 10-15%.",
       "default": true,
       "editor": "checkbox",
       "sectionCaption": "Swarm Intelligence",
-      "sectionDescription": "Configure multi-agent coordination for improved predictions"
+      "sectionDescription": "Configure multi-agent coordination for improved prediction accuracy through ensemble voting."
     },
     "swarmAgents": {
       "title": "Number of Swarm Agents",
       "type": "integer",
-      "description": "Number of agents in the swarm (3-10 recommended)",
+      "description": "How many independent neural agents to use. More agents = better accuracy but slower. Range: 3-10 recommended.",
       "minimum": 2,
-      "maximum": 20,
+      "maximum": 15,
       "default": 5,
+      "prefill": 5,
       "editor": "number"
     },
     "swarmConsensus": {
       "title": "Consensus Method",
       "type": "string",
-      "description": "How agents reach consensus on predictions",
-      "enum": [
-        "majority",
-        "weighted",
-        "unanimous",
-        "confidence"
-      ],
+      "description": "How agents combine their predictions. Weighted average gives best results.",
+      "enum": ["majority", "weighted", "unanimous", "confidence"],
       "enumTitles": [
         "Majority Vote - Simple majority wins",
-        "Weighted Average - Weight by confidence",
+        "Weighted Average (Recommended) - Weight by confidence",
         "Unanimous - All agents must agree",
-        "Confidence Weighted - Higher confidence = more weight"
+        "Confidence Weighted - Highest confidence dominates"
       ],
       "default": "weighted",
+      "prefill": "weighted",
       "editor": "select"
     },
     "swarmDiversity": {
       "title": "Strategy Diversity",
       "type": "boolean",
-      "description": "Use different strategies across agents for ensemble effect",
+      "description": "Use different neural strategies across agents for true ensemble effect. Recommended.",
       "default": true,
       "editor": "checkbox"
     },
     "patterns": {
-      "title": "Chart Patterns",
+      "title": "Chart Patterns to Detect",
       "type": "array",
-      "description": "Enable specific chart pattern recognition",
+      "description": "Select which chart patterns to recognize. 'All Patterns' enables comprehensive detection.",
       "editor": "select",
       "uniqueItems": true,
       "items": {
         "type": "string",
-        "enum": [
-          "head_shoulders",
-          "double_top",
-          "double_bottom",
-          "triangle",
-          "wedge",
-          "flag",
-          "pennant",
-          "cup_handle",
-          "fibonacci",
-          "elliott_wave",
-          "all"
-        ],
+        "enum": ["all", "head_shoulders", "double_top", "double_bottom", "triangle", "wedge", "flag", "pennant", "cup_handle", "fibonacci", "elliott_wave"],
         "enumTitles": [
-          "Head & Shoulders",
-          "Double Top",
-          "Double Bottom",
-          "Triangle (Ascending/Descending)",
-          "Wedge (Rising/Falling)",
-          "Flag",
-          "Pennant",
-          "Cup & Handle",
+          "All Patterns (Recommended)",
+          "Head & Shoulders - Reversal pattern",
+          "Double Top - Bearish reversal",
+          "Double Bottom - Bullish reversal",
+          "Triangle - Continuation pattern",
+          "Wedge - Reversal pattern",
+          "Flag - Continuation pattern",
+          "Pennant - Continuation pattern",
+          "Cup & Handle - Bullish pattern",
           "Fibonacci Retracements",
-          "Elliott Wave",
-          "All Patterns"
+          "Elliott Wave Analysis"
         ]
       },
       "default": ["all"],
+      "prefill": ["all"],
       "sectionCaption": "Technical Analysis",
-      "sectionDescription": "Configure chart patterns and technical indicators"
+      "sectionDescription": "Configure chart pattern recognition and technical indicators for market analysis."
     },
     "enableRsi": {
       "title": "RSI (Relative Strength Index)",
       "type": "boolean",
-      "description": "Momentum oscillator measuring speed of price changes",
+      "description": "Momentum oscillator (0-100). Overbought >70, Oversold <30. Essential indicator.",
       "default": true,
       "editor": "checkbox"
     },
     "enableMacd": {
-      "title": "MACD",
+      "title": "MACD (Moving Average Convergence Divergence)",
       "type": "boolean",
-      "description": "Moving Average Convergence Divergence - trend following",
+      "description": "Trend-following momentum indicator. Shows relationship between two moving averages.",
       "default": true,
       "editor": "checkbox"
     },
     "enableBollinger": {
       "title": "Bollinger Bands",
       "type": "boolean",
-      "description": "Volatility bands around moving average",
+      "description": "Volatility bands around moving average. Squeeze indicates breakout potential.",
       "default": true,
       "editor": "checkbox"
     },
     "enableEma": {
       "title": "EMA (Exponential Moving Average)",
       "type": "boolean",
-      "description": "Weighted moving average emphasizing recent prices",
+      "description": "Trend indicator emphasizing recent prices. EMA crossovers signal trend changes.",
       "default": true,
       "editor": "checkbox"
     },
     "enableStochastic": {
       "title": "Stochastic Oscillator",
       "type": "boolean",
-      "description": "Momentum indicator comparing closing price to range",
+      "description": "Momentum indicator comparing closing price to range. Good for ranging markets.",
       "default": true,
       "editor": "checkbox"
     },
     "enableAtr": {
       "title": "ATR (Average True Range)",
       "type": "boolean",
-      "description": "Volatility indicator measuring market volatility",
+      "description": "Volatility indicator. Used for position sizing and stop-loss placement.",
       "default": true,
       "editor": "checkbox"
     },
     "enableAdx": {
       "title": "ADX (Average Directional Index)",
       "type": "boolean",
-      "description": "Trend strength indicator (0-100)",
+      "description": "Trend strength indicator (0-100). Strong trend >25, Very strong >50.",
       "default": true,
       "editor": "checkbox"
     },
     "enableVwap": {
       "title": "VWAP (Volume Weighted Average Price)",
       "type": "boolean",
-      "description": "Average price weighted by volume",
+      "description": "Institutional benchmark price. Useful for intraday trading strategies.",
       "default": false,
       "editor": "checkbox"
     },
     "enableIchimoku": {
       "title": "Ichimoku Cloud",
       "type": "boolean",
-      "description": "Comprehensive indicator showing support, resistance, momentum",
+      "description": "Comprehensive indicator showing support, resistance, trend direction, and momentum.",
       "default": false,
       "editor": "checkbox"
     },
     "outputFormat": {
       "title": "Output Format",
       "type": "string",
-      "description": "Format for trading signals and analysis",
-      "enum": [
-        "signals",
-        "full_analysis",
-        "portfolio",
-        "webhook",
-        "csv",
-        "json"
-      ],
+      "description": "How to format the results. Full Analysis provides the most detail.",
+      "enum": ["signals", "full_analysis", "portfolio", "webhook", "csv", "json"],
       "enumTitles": [
-        "Signals Only - Buy/Sell/Hold",
-        "Full Analysis - Detailed breakdown",
-        "Portfolio Report - Allocation & risk",
-        "Webhook - Send to HTTP endpoint",
-        "CSV Export - Spreadsheet format",
-        "Raw JSON - Complete data"
+        "Signals Only - Buy/Sell/Hold list",
+        "Full Analysis (Recommended) - Complete breakdown",
+        "Portfolio Report - Allocation and risk metrics",
+        "Webhook Format - For trading bot integration",
+        "CSV Export - Spreadsheet compatible",
+        "Raw JSON - Complete data structure"
       ],
       "default": "full_analysis",
+      "prefill": "full_analysis",
       "editor": "select",
       "sectionCaption": "Output & Notifications",
-      "sectionDescription": "Configure output format and webhook notifications"
+      "sectionDescription": "Configure how results are formatted and where to send notifications."
     },
     "webhookUrl": {
       "title": "Webhook URL",
       "type": "string",
-      "description": "HTTP endpoint for sending trading signals (optional)",
+      "description": "HTTP endpoint to receive trading signals. Must be HTTPS for security. Leave empty to disable.",
       "editor": "textfield",
-      "pattern": "^https?://.*",
       "nullable": true
     },
     "webhookSecret": {
-      "title": "Webhook Secret",
+      "title": "Webhook Secret Key",
       "type": "string",
-      "description": "Secret key for webhook authentication (HMAC signature)",
+      "description": "Secret key for HMAC signature verification. Secures webhook authenticity.",
       "editor": "textfield",
       "isSecret": true,
       "nullable": true
@@ -466,36 +429,37 @@
     "emailNotifications": {
       "title": "Email Notifications",
       "type": "boolean",
-      "description": "Send email alerts for high-confidence signals",
+      "description": "Send email alerts for high-confidence signals. Configure in Apify settings.",
       "default": false,
       "editor": "checkbox"
     },
     "notifyOnSignal": {
-      "title": "Notify on Signal Types",
+      "title": "Notify On Signal Types",
       "type": "array",
-      "description": "Which signal types trigger notifications",
+      "description": "Which signal types should trigger notifications.",
       "editor": "select",
       "uniqueItems": true,
       "items": {
         "type": "string",
-        "enum": ["buy", "sell", "hold", "alert"],
-        "enumTitles": ["Buy Signals", "Sell Signals", "Hold Signals", "Risk Alerts"]
+        "enum": ["buy", "sell", "alert"],
+        "enumTitles": ["Buy Signals", "Sell Signals", "Risk Alerts"]
       },
-      "default": ["buy", "sell"]
+      "default": ["buy", "sell"],
+      "prefill": ["buy", "sell"]
     },
     "dryRun": {
-      "title": "Dry Run Mode",
+      "title": "Dry Run Mode (Paper Trading)",
       "type": "boolean",
-      "description": "Simulate trades without executing (paper trading)",
+      "description": "Simulate trades without real execution. ALWAYS enable for testing. Disabling executes real trades!",
       "default": true,
       "editor": "checkbox",
-      "sectionCaption": "Live Trading Settings",
-      "sectionDescription": "Configuration for live trading mode with Alpaca API"
+      "sectionCaption": "Live Trading Configuration",
+      "sectionDescription": "Settings for live trading mode with Alpaca API. Requires API keys for real trading."
     },
     "alpacaApiKey": {
       "title": "Alpaca API Key",
       "type": "string",
-      "description": "Your Alpaca API key for live/paper trading",
+      "description": "Your Alpaca trading API key. Get free at alpaca.markets. Required for live trading.",
       "editor": "textfield",
       "isSecret": true,
       "nullable": true
@@ -503,362 +467,344 @@
     "alpacaSecretKey": {
       "title": "Alpaca Secret Key",
       "type": "string",
-      "description": "Your Alpaca secret key for live/paper trading",
+      "description": "Your Alpaca secret key. Keep confidential. Required for live trading.",
       "editor": "textfield",
       "isSecret": true,
       "nullable": true
     },
     "alpacaPaper": {
-      "title": "Use Paper Trading",
+      "title": "Use Alpaca Paper Trading",
       "type": "boolean",
-      "description": "Use Alpaca paper trading environment (recommended for testing)",
+      "description": "Use Alpaca's paper trading environment. Recommended for testing strategies safely.",
       "default": true,
       "editor": "checkbox"
     },
     "autoTrade": {
       "title": "Auto-Execute Trades",
       "type": "boolean",
-      "description": "Automatically execute trades when signals are generated (use with caution)",
+      "description": "WARNING: Automatically execute trades when signals are generated. Use with extreme caution!",
       "default": false,
       "editor": "checkbox"
     },
     "maxDailyTrades": {
-      "title": "Max Daily Trades",
+      "title": "Maximum Daily Trades",
       "type": "integer",
-      "description": "Maximum number of trades per day (0 = unlimited)",
+      "description": "Limit trades per day to control costs and risk. Set to 0 for unlimited (not recommended).",
       "minimum": 0,
-      "maximum": 100,
+      "maximum": 50,
       "default": 10,
+      "prefill": 10,
       "editor": "number"
     },
     "tradingHoursOnly": {
-      "title": "Trading Hours Only",
+      "title": "Trade During Market Hours Only",
       "type": "boolean",
-      "description": "Only trade during market hours (9:30 AM - 4:00 PM ET)",
+      "description": "Only execute trades during regular market hours (9:30 AM - 4:00 PM ET for US stocks).",
       "default": true,
       "editor": "checkbox"
     },
     "initialCapital": {
       "title": "Initial Capital ($)",
-      "type": "number",
-      "description": "Starting capital for backtest simulation ($1,000 - $10,000,000)",
+      "type": "integer",
+      "description": "Starting portfolio value for backtest simulation. Use realistic amounts for meaningful results.",
       "minimum": 1000,
       "maximum": 10000000,
       "default": 100000,
+      "prefill": 100000,
       "editor": "number",
-      "sectionCaption": "Backtest Settings",
-      "sectionDescription": "Configuration for Monte Carlo backtesting mode"
+      "sectionCaption": "Backtest Configuration",
+      "sectionDescription": "Settings for Monte Carlo backtesting mode. Simulates historical performance with statistical confidence."
     },
     "backtestDays": {
       "title": "Backtest Period (Days)",
       "type": "integer",
-      "description": "Number of days to backtest the strategy",
-      "minimum": 1,
+      "description": "Number of historical days to test. Longer periods provide more statistical significance.",
+      "minimum": 7,
       "maximum": 365,
       "default": 30,
+      "prefill": 30,
       "editor": "number"
     },
     "monteCarloRuns": {
       "title": "Monte Carlo Simulations",
       "type": "integer",
-      "description": "Number of Monte Carlo simulation runs for confidence intervals",
+      "description": "Number of randomized simulations for confidence intervals. More = more accurate but slower.",
       "minimum": 100,
-      "maximum": 10000,
+      "maximum": 5000,
       "default": 1000,
+      "prefill": 1000,
       "editor": "number"
     },
     "walkForward": {
-      "title": "Walk-Forward Analysis",
+      "title": "Walk-Forward Optimization",
       "type": "boolean",
-      "description": "Use walk-forward optimization with train/test splits",
+      "description": "Use rolling train/test splits to prevent overfitting. Recommended for robust results.",
       "default": true,
       "editor": "checkbox"
     },
     "slippage": {
       "title": "Slippage (%)",
       "type": "number",
-      "description": "Simulated slippage for realistic backtest results",
+      "description": "Simulated price slippage per trade. Realistic values: 0.05-0.2% for liquid assets.",
       "minimum": 0,
-      "maximum": 5,
+      "maximum": 2,
       "default": 0.1,
+      "prefill": 0.1,
       "editor": "number"
     },
     "commission": {
-      "title": "Commission ($)",
+      "title": "Commission Per Trade ($)",
       "type": "number",
-      "description": "Commission per trade for backtest",
+      "description": "Trading commission/fees per trade. Many brokers now offer $0 commissions.",
       "minimum": 0,
-      "maximum": 50,
-      "default": 1,
+      "maximum": 20,
+      "default": 0,
+      "prefill": 0,
       "editor": "number"
     },
     "bankroll": {
-      "title": "Bankroll ($)",
-      "type": "number",
-      "description": "Starting bankroll for sports betting ($100 - $1,000,000)",
+      "title": "Starting Bankroll ($)",
+      "type": "integer",
+      "description": "Total betting bankroll for sports betting mode. Kelly Criterion sizes bets from this.",
       "minimum": 100,
       "maximum": 1000000,
       "default": 10000,
+      "prefill": 10000,
       "editor": "number",
-      "sectionCaption": "Sports Betting Settings",
-      "sectionDescription": "Configuration for sports betting with Kelly Criterion"
+      "sectionCaption": "Sports Betting Configuration",
+      "sectionDescription": "Settings for sports betting mode with Kelly Criterion optimal bet sizing."
     },
     "minEdge": {
       "title": "Minimum Edge (%)",
-      "type": "number",
-      "description": "Minimum edge percentage required to place a bet (1-50%)",
+      "type": "integer",
+      "description": "Only bet when model probability exceeds market odds by this percentage. Higher = fewer but safer bets.",
       "minimum": 1,
-      "maximum": 50,
+      "maximum": 30,
       "default": 5,
+      "prefill": 5,
       "editor": "number"
     },
     "kellyFraction": {
       "title": "Kelly Fraction",
       "type": "number",
-      "description": "Fraction of Kelly criterion to use (0.25 = quarter Kelly, safer)",
+      "description": "Fraction of full Kelly criterion to use. 0.25 = quarter Kelly (safer), 0.5 = half Kelly (recommended).",
       "minimum": 0.1,
-      "maximum": 1,
+      "maximum": 1.0,
       "default": 0.5,
+      "prefill": 0.5,
+      "editor": "number"
+    },
+    "maxBetSize": {
+      "title": "Maximum Bet Size (%)",
+      "type": "integer",
+      "description": "Cap single bet at this percentage of bankroll regardless of Kelly recommendation.",
+      "minimum": 1,
+      "maximum": 25,
+      "default": 5,
+      "prefill": 5,
       "editor": "number"
     },
     "sportsLeagues": {
       "title": "Sports Leagues",
       "type": "array",
-      "description": "Sports leagues to analyze for betting opportunities",
+      "description": "Which sports/leagues to analyze for betting opportunities.",
       "editor": "select",
       "uniqueItems": true,
       "items": {
         "type": "string",
-        "enum": [
-          "nfl",
-          "nba",
-          "mlb",
-          "nhl",
-          "ncaaf",
-          "ncaab",
-          "soccer_epl",
-          "soccer_mls",
-          "soccer_champions",
-          "tennis",
-          "ufc",
-          "boxing",
-          "golf",
-          "all"
-        ],
+        "enum": ["nfl", "nba", "mlb", "nhl", "ncaaf", "ncaab", "soccer_epl", "soccer_champions", "tennis", "ufc", "all"],
         "enumTitles": [
-          "NFL (American Football)",
-          "NBA (Basketball)",
-          "MLB (Baseball)",
-          "NHL (Hockey)",
+          "NFL - American Football",
+          "NBA - Basketball",
+          "MLB - Baseball",
+          "NHL - Hockey",
           "NCAA Football",
           "NCAA Basketball",
           "English Premier League",
-          "MLS (Soccer)",
           "UEFA Champions League",
           "Tennis (ATP/WTA)",
-          "UFC (MMA)",
-          "Boxing",
-          "Golf (PGA)",
+          "UFC/MMA",
           "All Sports"
         ]
       },
-      "default": ["nfl", "nba"]
+      "default": ["nfl", "nba"],
+      "prefill": ["nfl", "nba"]
     },
     "betTypes": {
-      "title": "Bet Types",
+      "title": "Bet Types to Analyze",
       "type": "array",
-      "description": "Types of bets to analyze",
+      "description": "Which types of bets to consider. Moneyline and spreads are most common.",
       "editor": "select",
       "uniqueItems": true,
       "items": {
         "type": "string",
-        "enum": ["moneyline", "spread", "totals", "props", "parlays"],
+        "enum": ["moneyline", "spread", "totals", "props"],
         "enumTitles": [
-          "Moneyline (Win/Lose)",
-          "Point Spread",
-          "Over/Under Totals",
-          "Player Props",
-          "Parlays (Multi-leg)"
+          "Moneyline - Win/Lose outright",
+          "Point Spread - Cover the spread",
+          "Totals - Over/Under points",
+          "Player Props - Individual stats"
         ]
       },
-      "default": ["moneyline", "spread", "totals"]
+      "default": ["moneyline", "spread", "totals"],
+      "prefill": ["moneyline", "spread", "totals"]
     },
     "oddsApiKey": {
       "title": "The Odds API Key",
       "type": "string",
-      "description": "API key for The Odds API (get free key at the-odds-api.com)",
+      "description": "API key for real-time odds. Get free key at the-odds-api.com (500 requests/month free).",
       "editor": "textfield",
       "isSecret": true,
       "nullable": true
     },
     "minLiquidity": {
-      "title": "Minimum Liquidity ($)",
-      "type": "number",
-      "description": "Minimum market liquidity to consider ($1,000 - $10,000,000)",
+      "title": "Minimum Market Liquidity ($)",
+      "type": "integer",
+      "description": "Only analyze markets with at least this much liquidity. Higher = more reliable but fewer opportunities.",
       "minimum": 1000,
-      "maximum": 10000000,
+      "maximum": 1000000,
       "default": 10000,
+      "prefill": 10000,
       "editor": "number",
-      "sectionCaption": "Prediction Markets Settings",
-      "sectionDescription": "Configuration for Polymarket analysis"
+      "sectionCaption": "Prediction Markets Configuration",
+      "sectionDescription": "Settings for Polymarket prediction markets analysis and probability modeling."
     },
     "marketCategories": {
       "title": "Market Categories",
       "type": "array",
-      "description": "Prediction market categories to analyze",
+      "description": "Which prediction market categories to analyze.",
       "editor": "select",
       "uniqueItems": true,
       "items": {
         "type": "string",
-        "enum": [
-          "politics",
-          "crypto",
-          "sports",
-          "entertainment",
-          "economics",
-          "science",
-          "weather",
-          "all"
-        ],
+        "enum": ["politics", "crypto", "sports", "entertainment", "economics", "science", "all"],
         "enumTitles": [
           "Politics & Elections",
-          "Cryptocurrency",
-          "Sports Events",
+          "Cryptocurrency Events",
+          "Sports Outcomes",
           "Entertainment",
           "Economics & Finance",
           "Science & Tech",
-          "Weather Events",
           "All Categories"
         ]
       },
-      "default": ["politics", "crypto"]
+      "default": ["politics", "crypto"],
+      "prefill": ["politics", "crypto"]
     },
     "minProbabilityEdge": {
       "title": "Minimum Probability Edge (%)",
-      "type": "number",
-      "description": "Minimum edge between model probability and market price",
-      "minimum": 1,
+      "type": "integer",
+      "description": "Only show opportunities where model probability differs from market by at least this much.",
+      "minimum": 5,
       "maximum": 50,
       "default": 10,
+      "prefill": 10,
       "editor": "number"
     },
     "marketTimeHorizon": {
       "title": "Market Time Horizon",
       "type": "string",
-      "description": "Filter markets by resolution timeframe",
-      "enum": ["1d", "1w", "1m", "3m", "6m", "1y", "all"],
+      "description": "Filter markets by when they resolve. Shorter horizons = faster feedback.",
+      "enum": ["1w", "1m", "3m", "6m", "1y", "all"],
       "enumTitles": [
-        "1 Day",
-        "1 Week",
-        "1 Month",
-        "3 Months",
-        "6 Months",
-        "1 Year",
+        "1 Week - Very short term",
+        "1 Month - Short term",
+        "3 Months - Medium term",
+        "6 Months - Long term",
+        "1 Year - Very long term",
         "All Markets"
       ],
       "default": "1m",
+      "prefill": "1m",
       "editor": "select"
     },
     "exchanges": {
-      "title": "Exchanges",
+      "title": "Cryptocurrency Exchanges",
       "type": "array",
-      "description": "Cryptocurrency exchanges to monitor for arbitrage",
+      "description": "Which exchanges to monitor for price discrepancies. More exchanges = more opportunities.",
       "editor": "select",
       "uniqueItems": true,
       "items": {
         "type": "string",
-        "enum": [
-          "binance",
-          "coinbase",
-          "kraken",
-          "bybit",
-          "okx",
-          "kucoin",
-          "gate",
-          "huobi",
-          "bitfinex",
-          "gemini"
-        ],
+        "enum": ["binance", "coinbase", "kraken", "bybit", "okx", "kucoin", "gate", "gemini"],
         "enumTitles": [
-          "Binance",
-          "Coinbase",
-          "Kraken",
-          "Bybit",
-          "OKX",
-          "KuCoin",
-          "Gate.io",
-          "Huobi",
-          "Bitfinex",
-          "Gemini"
+          "Binance - Largest volume",
+          "Coinbase - US regulated",
+          "Kraken - Low fees",
+          "Bybit - Derivatives",
+          "OKX - Asian markets",
+          "KuCoin - Altcoins",
+          "Gate.io - Wide selection",
+          "Gemini - US regulated"
         ]
       },
       "default": ["binance", "coinbase", "kraken"],
-      "sectionCaption": "Arbitrage Settings",
-      "sectionDescription": "Configuration for cross-exchange arbitrage detection"
+      "prefill": ["binance", "coinbase", "kraken"],
+      "sectionCaption": "Arbitrage Configuration",
+      "sectionDescription": "Settings for cross-exchange cryptocurrency and DeFi arbitrage detection."
     },
     "minSpread": {
-      "title": "Minimum Spread (%)",
+      "title": "Minimum Price Spread (%)",
       "type": "number",
-      "description": "Minimum price spread percentage to report (0.1-10%)",
+      "description": "Only report arbitrage when price difference exceeds this percentage after fees.",
       "minimum": 0.1,
-      "maximum": 10,
+      "maximum": 5,
       "default": 0.5,
+      "prefill": 0.5,
       "editor": "number"
     },
     "includeDeFi": {
-      "title": "Include DeFi",
+      "title": "Include DeFi Protocols",
       "type": "boolean",
-      "description": "Include decentralized exchange (DEX) arbitrage opportunities",
+      "description": "Scan decentralized exchanges (Uniswap, SushiSwap, etc.) for arbitrage opportunities.",
       "default": true,
       "editor": "checkbox"
     },
     "defiProtocols": {
-      "title": "DeFi Protocols",
+      "title": "DeFi Protocols to Monitor",
       "type": "array",
-      "description": "DeFi protocols to monitor for arbitrage",
+      "description": "Which decentralized protocols to include in arbitrage scanning.",
       "editor": "select",
       "uniqueItems": true,
       "items": {
         "type": "string",
         "enum": ["uniswap", "sushiswap", "curve", "balancer", "pancakeswap", "1inch"],
         "enumTitles": [
-          "Uniswap V3",
-          "SushiSwap",
-          "Curve Finance",
-          "Balancer",
-          "PancakeSwap",
-          "1inch Aggregator"
+          "Uniswap V3 - Ethereum DEX",
+          "SushiSwap - Multi-chain DEX",
+          "Curve Finance - Stablecoins",
+          "Balancer - Multi-asset pools",
+          "PancakeSwap - BSC DEX",
+          "1inch - Aggregator"
         ]
       },
-      "default": ["uniswap", "sushiswap"]
-    },
-    "includeFlashLoans": {
-      "title": "Include Flash Loans",
-      "type": "boolean",
-      "description": "Detect flash loan arbitrage opportunities (advanced)",
-      "default": false,
-      "editor": "checkbox"
+      "default": ["uniswap", "sushiswap"],
+      "prefill": ["uniswap", "sushiswap"]
     },
     "triangularArbitrage": {
       "title": "Triangular Arbitrage",
       "type": "boolean",
-      "description": "Detect triangular arbitrage paths (e.g., BTC→ETH→USDT→BTC)",
+      "description": "Detect multi-hop arbitrage paths (e.g., BTC->ETH->USDT->BTC). More complex but profitable.",
       "default": true,
       "editor": "checkbox"
     },
+    "includeFlashLoans": {
+      "title": "Include Flash Loan Opportunities",
+      "type": "boolean",
+      "description": "Detect arbitrage executable via flash loans (advanced). Requires DeFi expertise.",
+      "default": false,
+      "editor": "checkbox"
+    },
     "maxLatency": {
-      "title": "Max Latency (ms)",
+      "title": "Maximum Execution Latency (ms)",
       "type": "integer",
-      "description": "Maximum acceptable latency for arbitrage execution",
-      "minimum": 10,
+      "description": "Exclude opportunities that require faster execution than this. Lower = more opportunities but harder to execute.",
+      "minimum": 50,
       "maximum": 5000,
       "default": 500,
+      "prefill": 500,
       "editor": "number"
     }
   },
-  "required": [
-    "mode",
-    "symbols",
-    "strategy"
-  ]
+  "required": ["mode", "symbols", "strategy"]
 }
