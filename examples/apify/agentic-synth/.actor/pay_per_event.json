@@ -1,0 +1,124 @@
+{
+  "events": [
+    {
+      "eventName": "ecommerce-product",
+      "priceUsd": 0.0001,
+      "description": "E-commerce product record"
+    },
+    {
+      "eventName": "social-media-post",
+      "priceUsd": 0.0001,
+      "description": "Social media post record"
+    },
+    {
+      "eventName": "api-response",
+      "priceUsd": 0.0001,
+      "description": "API response record"
+    },
+    {
+      "eventName": "search-result",
+      "priceUsd": 0.0001,
+      "description": "Search result record"
+    },
+    {
+      "eventName": "real-estate-listing",
+      "priceUsd": 0.0001,
+      "description": "Real estate listing record"
+    },
+    {
+      "eventName": "job-listing",
+      "priceUsd": 0.0001,
+      "description": "Job listing record"
+    },
+    {
+      "eventName": "news-article",
+      "priceUsd": 0.0001,
+      "description": "News article record"
+    },
+    {
+      "eventName": "stock-trading-data",
+      "priceUsd": 0.0002,
+      "description": "Stock trading data record"
+    },
+    {
+      "eventName": "medical-record",
+      "priceUsd": 0.0002,
+      "description": "Medical record"
+    },
+    {
+      "eventName": "company-data",
+      "priceUsd": 0.0001,
+      "description": "Company data record"
+    },
+    {
+      "eventName": "supply-chain-data",
+      "priceUsd": 0.0002,
+      "description": "Supply chain data record"
+    },
+    {
+      "eventName": "financial-data",
+      "priceUsd": 0.0002,
+      "description": "Financial data record"
+    },
+    {
+      "eventName": "bloomberg-data",
+      "priceUsd": 0.0003,
+      "description": "Bloomberg-style terminal data"
+    },
+    {
+      "eventName": "structured-data",
+      "priceUsd": 0.0001,
+      "description": "Structured schema data"
+    },
+    {
+      "eventName": "timeseries-data",
+      "priceUsd": 0.0001,
+      "description": "Time series data point"
+    },
+    {
+      "eventName": "event-data",
+      "priceUsd": 0.0001,
+      "description": "Event tracking data"
+    },
+    {
+      "eventName": "embedding-data",
+      "priceUsd": 0.0001,
+      "description": "Embedding vector data"
+    },
+    {
+      "eventName": "demo-data",
+      "priceUsd": 0.0001,
+      "description": "Demo data record"
+    },
+    {
+      "eventName": "sona-learning-session",
+      "priceUsd": 0.001,
+      "description": "SONA self-learning session"
+    },
+    {
+      "eventName": "embedding-generation",
+      "priceUsd": 0.0002,
+      "description": "Embedding generation per record"
+    },
+    {
+      "eventName": "onnx-embedding-generation",
+      "priceUsd": 0.0003,
+      "description": "ONNX model embedding generation"
+    },
+    {
+      "eventName": "actor-integration",
+      "priceUsd": 0.001,
+      "description": "Actor data integration"
+    },
+    {
+      "eventName": "template-processing",
+      "priceUsd": 0.0005,
+      "description": "Template processing"
+    },
+    {
+      "eventName": "ai-generation",
+      "priceUsd": 0.002,
+      "description": "AI-powered generation (per record)"
+    }
+  ]
+}

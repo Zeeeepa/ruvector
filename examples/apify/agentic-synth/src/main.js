@@ -10,6 +10,16 @@ let ruvllm = null;
 let sonaCoordinator = null;
 let trajectoryBuilder = null;
 
+// Safe Actor.charge helper - gracefully handles cases where monetization isn't set up
+async function safeCharge(eventName, count = 1) {
+  try {
+    await Actor.charge({ eventName, count });
+  } catch (e) {
+    // Silently ignore charging errors - monetization may not be configured
+    log.debug?.(`Charge skipped for ${eventName}: ${e.message}`);
+  }
+}
+
 try {
   ruvllm = require('@ruvector/ruvllm');
   log.info('RuvLLM loaded successfully - TRM/SONA self-learning enabled');
@@ -85,7 +95,7 @@ try {
         log.info('Trajectory Builder initialized');
       }
       // Charge for SONA learning session
-      await Actor.charge({ eventName: 'sona-learning-session', count: 1 });
+      await safeCharge('sona-learning-session', 1);
     } catch (e) {
       log.warning(`SONA initialization failed: ${e.message}`);
     }
@@ -132,7 +142,7 @@ try {
       }
 
       // Charge for template execution
-      await Actor.charge({ eventName: 'template-execution', count: 1 });
+      await safeCharge('template-execution', 1);
     }
 
     // Fetch data from the actor's dataset
@@ -189,8 +199,8 @@ try {
       generatedData = result.data;
 
       // Charge for integration
-      await Actor.charge({ eventName: 'actor-integration', count: 1 });
-      await Actor.charge({ eventName: 'integrated-record', count: generatedData.length });
+      await safeCharge('actor-integration', 1);
+      await safeCharge('integrated-record', generatedData.length);
 
       log.info(`Transformed ${generatedData.length} records from ${effectiveActorId}`);
     } else if (mode === 'template' && templateConfig) {
@@ -291,7 +301,7 @@ try {
       try {
         generatedData = await addEmbeddingsToRecords(generatedData, { modelName: embeddingModel });
         log.info(`Added ONNX embeddings using ${embeddingModel} model`);
-        await Actor.charge({ eventName: 'onnx-embedding-generation', count: generatedData.length });
+        await safeCharge('onnx-embedding-generation', generatedData.length);
       } catch (e) {
         log.warning(`ONNX embedding failed: ${e.message}. Falling back to random embeddings.`);
         // Fall back to random embeddings
@@ -315,7 +325,7 @@ try {
     }
 
     // Charge for embedding generation
-    await Actor.charge({ eventName: 'embedding-generation', count: generatedData.length });
+    await safeCharge('embedding-generation', generatedData.length);
     log.info(`Added embeddings to ${generatedData.length} records`);
   }
 
@@ -394,7 +404,7 @@ try {
     log.info(`Simulation mode: pushing ${batchSize} records every ${delayBetweenBatches}ms`);
 
     // Charge for simulation session
-    await Actor.charge({ eventName: 'simulation-session', count: 1 });
+    await safeCharge('simulation-session', 1);
 
     const totalBatches = Math.ceil(generatedData.length / batchSize);
 
@@ -419,7 +429,7 @@ try {
       })));
 
       // Charge for simulation batch
-      await Actor.charge({ eventName: 'simulation-batch', count: 1 });
+      await safeCharge('simulation-batch', 1);
 
       log.info(`Pushed batch ${batchNum}/${totalBatches}`);
 
@@ -450,13 +460,13 @@ try {
     // Charge for data type specific events
     const eventName = eventMap[dataType];
     if (eventName && mode === 'generate') {
-      await Actor.charge({ eventName, count: generatedData.length });
+      await safeCharge(eventName, generatedData.length);
       log.info(`Charged ${generatedData.length} ${eventName} events`);
     }
 
     // Charge for AI-enhanced records if using AI
     if ((geminiKey || openRouterKey) && dataType === 'structured') {
-      await Actor.charge({ eventName: 'ai-enhanced-record', count: generatedData.length });
+      await safeCharge('ai-enhanced-record', generatedData.length);
       log.info(`Charged ${generatedData.length} AI-enhanced events`);
     }
   }
@@ -496,7 +506,7 @@ try {
 
       if (response.ok) {
         log.info('Webhook notification sent successfully');
-        await Actor.charge({ eventName: 'webhook-notification', count: 1 });
+        await safeCharge('webhook-notification', 1);
       } else {
         log.warning(`Webhook failed with status: ${response.status}`);
       }

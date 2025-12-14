@@ -627,122 +627,483 @@ async function saveSession(memoryStore, sessionId) {
 // ============================================
 
 const POPULAR_ACTORS = {
+  // === MAPS & LOCAL ===
   'apify/google-maps-scraper': {
     name: 'Google Maps Scraper',
-    defaultFields: ['title', 'description', 'address', 'phone', 'website', 'totalScore', 'reviewsCount', 'categoryName'],
-    textTemplate: (item) => `${item.title || ''} - ${item.address || ''} - ${item.categoryName || ''} - Rating: ${item.totalScore || 'N/A'} (${item.reviewsCount || 0} reviews)`
+    category: 'local',
+    defaultFields: ['title', 'description', 'address', 'phone', 'website', 'totalScore', 'reviewsCount', 'categoryName', 'url'],
+    textTemplate: (item) => `${item.title || ''} - ${item.address || ''} - ${item.categoryName || ''} - Rating: ${item.totalScore || 'N/A'} (${item.reviewsCount || 0} reviews) - ${item.phone || ''}`
   },
+  'apify/yelp-scraper': {
+    name: 'Yelp Scraper',
+    category: 'local',
+    defaultFields: ['name', 'rating', 'reviewCount', 'address', 'categories', 'phone', 'price'],
+    textTemplate: (item) => `${item.name || ''} - ${item.address || ''} - ${(item.categories || []).join(', ')} - Rating: ${item.rating || 'N/A'} (${item.reviewCount || 0} reviews) - ${item.price || ''}`
+  },
+
+  // === SOCIAL MEDIA ===
   'apify/instagram-scraper': {
     name: 'Instagram Scraper',
-    defaultFields: ['caption', 'hashtags', 'likesCount', 'commentsCount', 'ownerUsername'],
-    textTemplate: (item) => `@${item.ownerUsername || 'unknown'}: ${item.caption || ''} ${(item.hashtags || []).map(h => '#' + h).join(' ')}`
+    category: 'social',
+    defaultFields: ['caption', 'hashtags', 'likesCount', 'commentsCount', 'ownerUsername', 'timestamp', 'url'],
+    textTemplate: (item) => `@${item.ownerUsername || 'unknown'}: ${item.caption || ''} ${(item.hashtags || []).map(h => '#' + h).join(' ')} - ${item.likesCount || 0} likes`
   },
   'apify/tiktok-scraper': {
     name: 'TikTok Scraper',
-    defaultFields: ['text', 'authorMeta', 'hashtags', 'diggCount', 'playCount'],
-    textTemplate: (item) => `@${item.authorMeta?.name || 'unknown'}: ${item.text || ''} - ${item.playCount || 0} plays`
+    category: 'social',
+    defaultFields: ['text', 'authorMeta', 'hashtags', 'diggCount', 'playCount', 'shareCount', 'createTime'],
+    textTemplate: (item) => `@${item.authorMeta?.name || 'unknown'}: ${item.text || ''} - ${item.playCount || 0} plays, ${item.diggCount || 0} likes`
   },
   'apify/youtube-scraper': {
     name: 'YouTube Scraper',
-    defaultFields: ['title', 'description', 'channelName', 'viewCount', 'likes'],
-    textTemplate: (item) => `${item.title || ''} by ${item.channelName || 'unknown'} - ${item.viewCount || 0} views`
+    category: 'social',
+    defaultFields: ['title', 'description', 'channelName', 'viewCount', 'likes', 'duration', 'uploadDate', 'url'],
+    textTemplate: (item) => `${item.title || ''} by ${item.channelName || 'unknown'} - ${item.viewCount || 0} views, ${item.likes || 0} likes - ${item.duration || ''}`
   },
+  'apify/twitter-scraper': {
+    name: 'Twitter/X Scraper',
+    category: 'social',
+    defaultFields: ['text', 'author', 'replyCount', 'retweetCount', 'likeCount', 'createdAt', 'url'],
+    textTemplate: (item) => `@${item.author?.userName || 'unknown'}: ${item.text || ''} - ${item.likeCount || 0} likes, ${item.retweetCount || 0} RTs`
+  },
+  'apify/reddit-scraper': {
+    name: 'Reddit Scraper',
+    category: 'social',
+    defaultFields: ['title', 'body', 'author', 'subreddit', 'score', 'numComments', 'url', 'createdAt'],
+    textTemplate: (item) => `r/${item.subreddit || 'unknown'} - ${item.title || ''}: ${(item.body || '').substring(0, 300)} - Score: ${item.score || 0}, ${item.numComments || 0} comments`
+  },
+  'apify/facebook-scraper': {
+    name: 'Facebook Scraper',
+    category: 'social',
+    defaultFields: ['text', 'likes', 'comments', 'shares', 'pageName', 'timestamp', 'url'],
+    textTemplate: (item) => `${item.pageName || 'Facebook'}: ${item.text || ''} - ${item.likes || 0} likes, ${item.comments || 0} comments`
+  },
+
+  // === E-COMMERCE ===
+  'apify/amazon-scraper': {
+    name: 'Amazon Scraper',
+    category: 'ecommerce',
+    defaultFields: ['title', 'description', 'price', 'stars', 'reviewsCount', 'asin', 'url', 'brand'],
+    textTemplate: (item) => `${item.title || ''} - $${item.price || 'N/A'} - ${item.stars || 'N/A'} stars (${item.reviewsCount || 0} reviews) - ${item.brand || ''}`
+  },
+  'apify/shopify-scraper': {
+    name: 'Shopify Scraper',
+    category: 'ecommerce',
+    defaultFields: ['title', 'description', 'price', 'vendor', 'productType', 'tags', 'url'],
+    textTemplate: (item) => `${item.title || ''} - $${item.price || 'N/A'} - ${item.vendor || ''} - ${item.productType || ''}`
+  },
+  'apify/ebay-scraper': {
+    name: 'eBay Scraper',
+    category: 'ecommerce',
+    defaultFields: ['title', 'price', 'condition', 'seller', 'location', 'url'],
+    textTemplate: (item) => `${item.title || ''} - $${item.price || 'N/A'} - ${item.condition || ''} - Seller: ${item.seller || ''}`
+  },
+  'apify/walmart-scraper': {
+    name: 'Walmart Scraper',
+    category: 'ecommerce',
+    defaultFields: ['name', 'price', 'rating', 'reviewCount', 'brand', 'url'],
+    textTemplate: (item) => `${item.name || ''} - $${item.price || 'N/A'} - ${item.rating || 'N/A'} stars - ${item.brand || ''}`
+  },
+
+  // === TRAVEL & HOSPITALITY ===
+  'apify/tripadvisor-scraper': {
+    name: 'TripAdvisor Scraper',
+    category: 'travel',
+    defaultFields: ['name', 'description', 'rating', 'reviewsCount', 'address', 'priceLevel', 'url'],
+    textTemplate: (item) => `${item.name || ''} - ${item.address || ''} - Rating: ${item.rating || 'N/A'} (${item.reviewsCount || 0} reviews) - ${item.priceLevel || ''}`
+  },
+  'apify/booking-scraper': {
+    name: 'Booking.com Scraper',
+    category: 'travel',
+    defaultFields: ['name', 'rating', 'reviewScore', 'price', 'address', 'url'],
+    textTemplate: (item) => `${item.name || ''} - ${item.address || ''} - Rating: ${item.rating || item.reviewScore || 'N/A'} - $${item.price || 'N/A'}/night`
+  },
+  'apify/airbnb-scraper': {
+    name: 'Airbnb Scraper',
+    category: 'travel',
+    defaultFields: ['name', 'price', 'rating', 'reviews', 'location', 'roomType', 'url'],
+    textTemplate: (item) => `${item.name || ''} - ${item.location || ''} - $${item.price || 'N/A'}/night - ${item.rating || 'N/A'} stars - ${item.roomType || ''}`
+  },
+
+  // === PROFESSIONAL ===
+  'apify/linkedin-scraper': {
+    name: 'LinkedIn Scraper',
+    category: 'professional',
+    defaultFields: ['name', 'headline', 'summary', 'company', 'location', 'connections', 'url'],
+    textTemplate: (item) => `${item.name || ''} - ${item.headline || ''} at ${item.company || 'N/A'} - ${item.location || ''}`
+  },
+  'apify/glassdoor-scraper': {
+    name: 'Glassdoor Scraper',
+    category: 'professional',
+    defaultFields: ['companyName', 'rating', 'reviewCount', 'salary', 'pros', 'cons'],
+    textTemplate: (item) => `${item.companyName || ''} - Rating: ${item.rating || 'N/A'} - Pros: ${item.pros || ''} - Cons: ${item.cons || ''}`
+  },
+  'apify/indeed-scraper': {
+    name: 'Indeed Job Scraper',
+    category: 'professional',
+    defaultFields: ['title', 'company', 'location', 'salary', 'description', 'url'],
+    textTemplate: (item) => `${item.title || ''} at ${item.company || ''} - ${item.location || ''} - ${item.salary || 'Salary not listed'}`
+  },
+
+  // === NEWS & CONTENT ===
   'apify/web-scraper': {
     name: 'Web Scraper',
-    defaultFields: ['url', 'title', 'text'],
+    category: 'content',
+    defaultFields: ['url', 'title', 'text', 'html'],
     textTemplate: (item) => `${item.title || item.url || ''}: ${(item.text || '').substring(0, 500)}`
   },
   'apify/website-content-crawler': {
     name: 'Website Content Crawler',
-    defaultFields: ['url', 'title', 'text', 'markdown'],
+    category: 'content',
+    defaultFields: ['url', 'title', 'text', 'markdown', 'screenshotUrl'],
     textTemplate: (item) => `${item.title || ''} (${item.url || ''}): ${(item.text || item.markdown || '').substring(0, 500)}`
   },
-  'apify/twitter-scraper': {
-    name: 'Twitter/X Scraper',
-    defaultFields: ['text', 'author', 'replyCount', 'retweetCount', 'likeCount'],
-    textTemplate: (item) => `@${item.author?.userName || 'unknown'}: ${item.text || ''}`
+  'apify/google-search-scraper': {
+    name: 'Google Search Scraper',
+    category: 'content',
+    defaultFields: ['title', 'description', 'url', 'position'],
+    textTemplate: (item) => `#${item.position || '?'}: ${item.title || ''} - ${item.description || ''} - ${item.url || ''}`
   },
-  'apify/amazon-scraper': {
-    name: 'Amazon Scraper',
-    defaultFields: ['title', 'description', 'price', 'stars', 'reviewsCount'],
-    textTemplate: (item) => `${item.title || ''} - $${item.price || 'N/A'} - ${item.stars || 'N/A'} stars (${item.reviewsCount || 0} reviews)`
+  'apify/news-scraper': {
+    name: 'News Scraper',
+    category: 'content',
+    defaultFields: ['title', 'text', 'author', 'date', 'source', 'url'],
+    textTemplate: (item) => `${item.source || ''}: ${item.title || ''} by ${item.author || 'unknown'} - ${(item.text || '').substring(0, 300)}`
   },
-  'apify/tripadvisor-scraper': {
-    name: 'TripAdvisor Scraper',
-    defaultFields: ['name', 'description', 'rating', 'reviewsCount', 'address'],
-    textTemplate: (item) => `${item.name || ''} - ${item.address || ''} - Rating: ${item.rating || 'N/A'}`
+  'apify/rss-feed-scraper': {
+    name: 'RSS Feed Scraper',
+    category: 'content',
+    defaultFields: ['title', 'description', 'link', 'pubDate', 'author'],
+    textTemplate: (item) => `${item.title || ''} - ${item.description || ''} - ${item.pubDate || ''}`
   },
-  'apify/linkedin-scraper': {
-    name: 'LinkedIn Scraper',
-    defaultFields: ['name', 'headline', 'summary', 'company', 'location'],
-    textTemplate: (item) => `${item.name || ''} - ${item.headline || ''} at ${item.company || 'N/A'}`
+
+  // === REAL ESTATE ===
+  'apify/zillow-scraper': {
+    name: 'Zillow Scraper',
+    category: 'realestate',
+    defaultFields: ['address', 'price', 'bedrooms', 'bathrooms', 'sqft', 'zestimate', 'url'],
+    textTemplate: (item) => `${item.address || ''} - $${item.price || 'N/A'} - ${item.bedrooms || '?'}bd/${item.bathrooms || '?'}ba - ${item.sqft || '?'} sqft`
+  },
+  'apify/realtor-scraper': {
+    name: 'Realtor.com Scraper',
+    category: 'realestate',
+    defaultFields: ['address', 'price', 'beds', 'baths', 'sqft', 'propertyType', 'url'],
+    textTemplate: (item) => `${item.address || ''} - $${item.price || 'N/A'} - ${item.beds || '?'}bd/${item.baths || '?'}ba - ${item.propertyType || ''}`
+  },
+
+  // === DATA GENERATORS ===
+  'ruv/ai-synthetic-data-generator': {
+    name: 'AI Synthetic Data Generator',
+    category: 'generator',
+    defaultFields: ['title', 'description', 'category', 'data'],
+    textTemplate: (item) => `${item.title || ''}: ${item.description || JSON.stringify(item.data || item).substring(0, 400)}`
+  },
+  'ruv/neural-trader-system': {
+    name: 'Neural Trader System',
+    category: 'trading',
+    defaultFields: ['symbol', 'signal', 'confidence', 'price', 'target', 'stopLoss'],
+    textTemplate: (item) => `${item.signal || 'HOLD'} ${item.symbol || ''} @ $${item.price?.toFixed(2) || 'N/A'} - Confidence: ${item.confidence || 0}% - Target: $${item.target?.toFixed(2) || 'N/A'}`
   }
 };
 
 async function integrateActorResults(memoryStore, actorId, config, apifyToken) {
   const client = new ApifyClient({ token: apifyToken });
 
+  // === DISCOVERY MODE - list all supported actors ===
+  if (config.discoveryMode || config.runMode === 'discovery') {
+    const actorsByCategory = {};
+    for (const [id, cfg] of Object.entries(POPULAR_ACTORS)) {
+      const cat = cfg.category || 'other';
+      if (!actorsByCategory[cat]) actorsByCategory[cat] = [];
+      actorsByCategory[cat].push({ id, name: cfg.name, fields: cfg.defaultFields });
+    }
+    return {
+      mode: 'discovery',
+      message: 'Discovery mode: Here are all supported actors with pre-configured memory templates.',
+      categories: Object.keys(actorsByCategory).sort(),
+      supportedActors: actorsByCategory,
+      totalActors: Object.keys(POPULAR_ACTORS).length,
+      usage: {
+        latestRun: { runMode: 'latest', actorId: 'apify/google-maps-scraper' },
+        specificRun: { runMode: 'specific', actorRunId: 'abc123xyz' },
+        directDataset: { runMode: 'dataset', actorDatasetId: 'dataset_id_here' },
+        freshRun: { runMode: 'fresh', actorInput: { searchStrings: ['query'] } }
+      }
+    };
+  }
+
+  // Get actor configuration (pre-configured or custom)
   const actorConfig = POPULAR_ACTORS[actorId] || {
-    name: actorId,
-    defaultFields: config.memorizeFields || ['title', 'description', 'text'],
-    textTemplate: (item) => JSON.stringify(item).substring(0, 500)
+    name: actorId.split('/').pop() || actorId,
+    category: 'custom',
+    defaultFields: config.memorizeFields || ['title', 'description', 'text', 'content', 'name'],
+    textTemplate: (item) => {
+      // Smart text extraction for unknown actors
+      const textFields = ['text', 'content', 'description', 'body', 'title', 'name', 'caption'];
+      for (const field of textFields) {
+        if (item[field] && typeof item[field] === 'string' && item[field].length > 10) {
+          return item[field].substring(0, 500);
+        }
+      }
+      return JSON.stringify(item).substring(0, 500);
+    }
   };
 
   let items = [];
+  let runInfo = null;
+  const startTime = Date.now();
+  const runMode = config.runMode || (config.runId ? (config.runId === 'latest' ? 'latest' : 'specific') :
+                                    config.datasetId ? 'dataset' :
+                                    config.actorInput ? 'fresh' : 'latest');
 
-  // Get results from specified run or latest
-  if (config.runId) {
-    const run = config.runId === 'latest'
-      ? await client.actor(actorId).lastRun().get()
-      : await client.run(config.runId).get();
-
-    if (run) {
-      const dataset = await client.dataset(run.defaultDatasetId).listItems({ limit: config.limit || 1000 });
+  try {
+    // === MODE: latest - Get from most recent run ===
+    if (runMode === 'latest') {
+      log.info(`Fetching data from latest run of ${actorId}...`);
+      const lastRun = await client.actor(actorId).lastRun().get();
+      if (!lastRun) {
+        throw new Error(`No runs found for actor ${actorId}. Use 'fresh' mode with actorInput to run it.`);
+      }
+      runInfo = lastRun;
+      const dataset = await client.dataset(runInfo.defaultDatasetId).listItems({
+        limit: config.limit || 1000,
+        offset: config.offset || 0,
+        clean: true
+      });
       items = dataset.items;
-    }
-  } else if (config.datasetId) {
-    const dataset = await client.dataset(config.datasetId).listItems({ limit: config.limit || 1000 });
-    items = dataset.items;
-  } else {
-    // Run the actor with provided input
-    const run = await client.actor(actorId).call(config.actorInput || {}, {
-      memory: config.memory || 1024,
-      timeout: config.timeout || 300
-    });
-    const dataset = await client.dataset(run.defaultDatasetId).listItems({ limit: config.limit || 1000 });
-    items = dataset.items;
-  }
 
-  log.info(`Retrieved ${items.length} items from ${actorConfig.name}`);
+    // === MODE: specific - Get from a specific run ID ===
+    } else if (runMode === 'specific' && config.runId) {
+      log.info(`Fetching data from specific run: ${config.runId}`);
+      runInfo = await client.run(config.runId).get();
+      if (!runInfo) {
+        throw new Error(`Run ${config.runId} not found`);
+      }
+      const dataset = await client.dataset(runInfo.defaultDatasetId).listItems({
+        limit: config.limit || 1000,
+        offset: config.offset || 0,
+        clean: true
+      });
+      items = dataset.items;
 
-  // Memorize items
-  const memorizeFields = config.memorizeFields || actorConfig.defaultFields;
-  const stored = [];
+    // === MODE: dataset - Direct dataset access ===
+    } else if (runMode === 'dataset' && config.datasetId) {
+      log.info(`Fetching data from dataset: ${config.datasetId}`);
+      const dataset = await client.dataset(config.datasetId).listItems({
+        limit: config.limit || 1000,
+        offset: config.offset || 0,
+        clean: true
+      });
+      items = dataset.items;
 
-  for (const item of items) {
-    const text = config.customTemplate
-      ? config.customTemplate(item)
-      : actorConfig.textTemplate(item);
+    // === MODE: fresh - Run actor with new input ===
+    } else if (runMode === 'fresh') {
+      if (!config.actorInput) {
+        throw new Error('actorInput is required for fresh mode. Provide input parameters for the actor.');
+      }
+      log.info(`Running actor ${actorId} with fresh input...`);
 
-    if (text && text.trim()) {
-      const metadata = {
-        source: actorId,
-        sourceActor: actorConfig.name,
-        ...Object.fromEntries(memorizeFields.filter(f => item[f] !== undefined).map(f => [f, item[f]]))
+      const actorInput = config.actorInput;
+      const runOptions = {
+        memory: config.memoryMbytes || config.memory || 2048,
+        timeout: config.timeout || 300
       };
 
-      await memoryStore.add(text, metadata);
-      stored.push({ text: text.substring(0, 100), metadata });
+      // Use sync mode for short runs (<5 min typical), async for longer
+      const useSync = config.useSync !== false && (config.timeout || 300) <= 300;
+
+      if (useSync) {
+        log.info(`Running synchronously (timeout: ${runOptions.timeout}s)...`);
+        runInfo = await client.actor(actorId).call(actorInput, runOptions);
+      } else {
+        log.info(`Running asynchronously...`);
+        const run = await client.actor(actorId).start(actorInput, runOptions);
+        log.info(`Run started: ${run.id}, waiting for completion...`);
+        runInfo = await client.run(run.id).waitForFinish({ waitSecs: config.timeout || 600 });
+      }
+
+      if (runInfo.status !== 'SUCCEEDED') {
+        throw new Error(`Actor run failed with status: ${runInfo.status}`);
+      }
+
+      const dataset = await client.dataset(runInfo.defaultDatasetId).listItems({
+        limit: config.limit || 1000,
+        clean: true
+      });
+      items = dataset.items;
+
+    // === FALLBACK: If runMode doesn't match, try to infer from config ===
+    } else if (config.runId) {
+      if (config.runId === 'latest') {
+        const lastRun = await client.actor(actorId).lastRun().get();
+        if (!lastRun) throw new Error(`No runs found for actor ${actorId}`);
+        runInfo = lastRun;
+      } else {
+        runInfo = await client.run(config.runId).get();
+      }
+      const dataset = await client.dataset(runInfo.defaultDatasetId).listItems({ limit: config.limit || 1000, clean: true });
+      items = dataset.items;
+    } else if (config.datasetId) {
+      const dataset = await client.dataset(config.datasetId).listItems({ limit: config.limit || 1000, clean: true });
+      items = dataset.items;
+    } else {
+      // Return list of supported actors
+      const actorsByCategory = {};
+      for (const [id, cfg] of Object.entries(POPULAR_ACTORS)) {
+        const cat = cfg.category || 'other';
+        if (!actorsByCategory[cat]) actorsByCategory[cat] = [];
+        actorsByCategory[cat].push({ id, name: cfg.name, fields: cfg.defaultFields });
+      }
+
+      return {
+        mode: 'discovery',
+        message: 'No runId, datasetId, or actorInput provided. Here are supported actors:',
+        supportedActors: actorsByCategory,
+        totalActors: Object.keys(POPULAR_ACTORS).length,
+        usage: {
+          fromLatestRun: { runId: 'latest' },
+          fromSpecificRun: { runId: 'abc123xyz' },
+          fromDataset: { datasetId: 'dataset_id_here' },
+          runFresh: { actorInput: { /* actor-specific input */ }, runFresh: true }
+        }
+      };
     }
+
+    log.info(`Retrieved ${items.length} items from ${actorConfig.name}`);
+
+    // === MEMORIZE ITEMS ===
+    const memorizeFields = config.memorizeFields || actorConfig.defaultFields;
+    const stored = [];
+    const errors = [];
+    const batchSize = config.batchSize || 50;
+
+    // Process in batches for better performance
+    for (let i = 0; i < items.length; i += batchSize) {
+      const batch = items.slice(i, i + batchSize);
+
+      await Promise.all(batch.map(async (item, idx) => {
+        try {
+          // Generate text from item
+          let text;
+          if (config.customTemplate && typeof config.customTemplate === 'string') {
+            // Template string interpolation: "{{title}} - {{description}}"
+            text = config.customTemplate.replace(/\{\{(\w+)\}\}/g, (_, key) => item[key] || '');
+          } else {
+            text = actorConfig.textTemplate(item);
+          }
+
+          if (text && text.trim() && text.length > 10) {
+            // Build metadata from specified fields
+            const metadata = {
+              source: actorId,
+              sourceActor: actorConfig.name,
+              category: actorConfig.category,
+              integratedAt: new Date().toISOString()
+            };
+
+            // Add specified fields to metadata
+            for (const field of memorizeFields) {
+              if (item[field] !== undefined && item[field] !== null) {
+                metadata[field] = item[field];
+              }
+            }
+
+            // Add URL if available
+            if (item.url) metadata.url = item.url;
+            if (item.link) metadata.url = item.link;
+
+            await memoryStore.add(text, metadata);
+            stored.push({
+              text: text.substring(0, 150) + (text.length > 150 ? '...' : ''),
+              metadata
+            });
+          }
+        } catch (e) {
+          errors.push({ index: i + idx, error: e.message });
+        }
+      }));
+
+      // Progress logging for large datasets
+      if (items.length > 100 && (i + batchSize) % 200 === 0) {
+        log.info(`Processed ${Math.min(i + batchSize, items.length)}/${items.length} items...`);
+      }
+    }
+
+    const duration = ((Date.now() - startTime) / 1000).toFixed(1);
+
+    return {
+      success: true,
+      actorId,
+      actorName: actorConfig.name,
+      category: actorConfig.category,
+      runId: runInfo?.id || null,
+      datasetId: runInfo?.defaultDatasetId || config.datasetId || null,
+      itemsRetrieved: items.length,
+      memoriesStored: stored.length,
+      errors: errors.length > 0 ? errors.slice(0, 5) : undefined,
+      duration: `${duration}s`,
+      sampleMemories: stored.slice(0, 5),
+      totalMemories: memoryStore.size(),
+      suggestedSearches: generateSuggestedSearches(actorConfig, items.slice(0, 10))
+    };
+
+  } catch (error) {
+    log.error(`Actor integration failed: ${error.message}`);
+
+    return {
+      success: false,
+      actorId,
+      actorName: actorConfig.name,
+      error: error.message,
+      suggestion: error.message.includes('not found')
+        ? 'Check the actor ID or run the actor first'
+        : error.message.includes('token')
+        ? 'Verify your APIFY_TOKEN is valid'
+        : 'Check actor input and try again',
+      supportedActors: Object.keys(POPULAR_ACTORS).slice(0, 10)
+    };
+  }
+}
+
+// Generate suggested searches based on integrated data
+function generateSuggestedSearches(actorConfig, sampleItems) {
+  const suggestions = [];
+
+  switch (actorConfig.category) {
+    case 'local':
+      suggestions.push('highly rated places', 'restaurants near me', 'best reviews');
+      break;
+    case 'social':
+      suggestions.push('viral posts', 'trending hashtags', 'popular content');
+      break;
+    case 'ecommerce':
+      suggestions.push('best deals', 'top rated products', 'products under $50');
+      break;
+    case 'travel':
+      suggestions.push('best hotels', 'top attractions', 'budget accommodations');
+      break;
+    case 'professional':
+      suggestions.push('job openings', 'company reviews', 'salary information');
+      break;
+    case 'content':
+      suggestions.push('recent articles', 'how to guides', 'documentation');
+      break;
+    case 'realestate':
+      suggestions.push('houses for sale', 'affordable homes', 'new listings');
+      break;
+    default:
+      suggestions.push('recent data', 'popular items', 'top results');
   }
 
-  return {
-    actorId,
-    actorName: actorConfig.name,
-    itemsRetrieved: items.length,
-    memoriesStored: stored.length,
-    sampleMemories: stored.slice(0, 5)
-  };
+  // Add dynamic suggestions from sample data
+  if (sampleItems.length > 0) {
+    const sample = sampleItems[0];
+    if (sample.title) suggestions.push(sample.title.split(' ').slice(0, 3).join(' '));
+    if (sample.category) suggestions.push(sample.category);
+    if (sample.categoryName) suggestions.push(sample.categoryName);
+  }
+
+  return suggestions.slice(0, 5);
 }
 
 // ============================================
@@ -1398,13 +1759,34 @@ try {
 
     case 'integrate_actor':
       // One-click integration with popular Apify actors
-      if (!actorId) {
-        throw new Error('actorId is required for integrate_actor action. Try "apify/google-maps-scraper", "apify/instagram-scraper", etc.');
+      const effectiveActorId = input.actorId === 'custom' ? input.customActorId : input.actorId;
+      const runMode = input.actorRunMode || 'latest';
+
+      // Discovery mode - list all supported actors
+      if (runMode === 'discovery') {
+        result = await integrateActorResults(memoryStore, null, { discoveryMode: true }, apifyToken);
+        break;
+      }
+
+      if (!effectiveActorId) {
+        throw new Error('actorId is required for integrate_actor action. Select from dropdown or use "Custom Actor" with customActorId.');
       }
       if (!apifyToken) {
         throw new Error('APIFY_TOKEN environment variable is required for actor integration');
       }
-      result = await integrateActorResults(memoryStore, actorId, actorConfig || {}, apifyToken);
+
+      // Build enhanced config from new UI fields
+      const enhancedActorConfig = {
+        ...actorConfig,
+        runMode,
+        runId: input.actorRunId,
+        datasetId: input.actorDatasetId,
+        actorInput: input.actorInput,
+        timeout: input.actorTimeout || 120,
+        memoryMbytes: input.actorMemoryLimit || 1024
+      };
+
+      result = await integrateActorResults(memoryStore, effectiveActorId, enhancedActorConfig, apifyToken);
       await safeCharge('actor-integration', result.memoriesStored || 1);
       break;
 

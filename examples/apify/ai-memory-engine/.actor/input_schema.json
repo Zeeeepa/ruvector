@@ -441,25 +441,168 @@
     },
 
     "actorId": {
-      "title": "Apify Actor ID",
+      "title": "Actor to Integrate",
       "type": "string",
-      "description": "The Apify actor to pull data from (e.g., apify/google-maps-scraper)",
-      "editor": "textfield",
-      "sectionCaption": "Integrations",
-      "sectionDescription": "Connect with other Apify actors to automatically memorize scraped data. One-click integration with popular scrapers.",
-      "prefill": "apify/google-maps-scraper",
-      "example": "apify/instagram-scraper"
+      "description": "Select a popular actor or enter any Apify actor ID (owner/actor-name)",
+      "editor": "select",
+      "sectionCaption": "Actor Integration",
+      "sectionDescription": "One-click integration with 25+ popular Apify actors. Automatically fetch data and memorize it for semantic search. Use 'Custom Actor' to integrate any actor.",
+      "default": "apify/google-maps-scraper",
+      "enum": [
+        "apify/google-maps-scraper",
+        "apify/yelp-scraper",
+        "apify/tripadvisor-scraper",
+        "apify/instagram-scraper",
+        "apify/twitter-scraper",
+        "apify/tiktok-scraper",
+        "apify/reddit-scraper",
+        "apify/facebook-scraper",
+        "apify/linkedin-scraper",
+        "apify/youtube-scraper",
+        "apify/amazon-scraper",
+        "apify/shopify-scraper",
+        "apify/ebay-scraper",
+        "apify/walmart-scraper",
+        "apify/booking-scraper",
+        "apify/airbnb-scraper",
+        "apify/expedia-scraper",
+        "apify/glassdoor-scraper",
+        "apify/indeed-scraper",
+        "apify/crunchbase-scraper",
+        "apify/google-search-scraper",
+        "apify/news-scraper",
+        "apify/rss-feed-scraper",
+        "apify/zillow-scraper",
+        "apify/realtor-scraper",
+        "ruv/ai-synthetic-data-generator",
+        "ruv/neural-trader-system",
+        "custom"
+      ],
+      "enumTitles": [
+        "Google Maps - Local businesses, reviews, locations",
+        "Yelp - Business reviews & ratings",
+        "TripAdvisor - Travel reviews & ratings",
+        "Instagram - Posts, profiles, hashtags",
+        "Twitter/X - Tweets, profiles, trends",
+        "TikTok - Videos, creators, trends",
+        "Reddit - Posts, comments, subreddits",
+        "Facebook - Pages, posts, groups",
+        "LinkedIn - Profiles, companies, jobs",
+        "YouTube - Videos, channels, comments",
+        "Amazon - Products, reviews, prices",
+        "Shopify - E-commerce products",
+        "eBay - Auction listings, products",
+        "Walmart - Products & prices",
+        "Booking.com - Hotels, reviews, prices",
+        "Airbnb - Listings, reviews, availability",
+        "Expedia - Travel deals, flights, hotels",
+        "Glassdoor - Company reviews, salaries",
+        "Indeed - Job listings, salaries",
+        "Crunchbase - Startups, funding data",
+        "Google Search - SERP results, snippets",
+        "News - News articles from multiple sources",
+        "RSS Feed - Custom feed content",
+        "Zillow - Real estate listings",
+        "Realtor.com - Property listings",
+        "Synthetic Data Generator - AI-generated test data",
+        "Neural Trader System - Trading signals & analysis",
+        "Custom Actor - Enter custom actor ID below"
+      ]
     },
-    "actorConfig": {
-      "title": "Actor Integration Settings",
+    "customActorId": {
+      "title": "Custom Actor ID",
+      "type": "string",
+      "description": "Enter the full actor ID (e.g., username/actor-name) when using 'Custom Actor' option",
+      "editor": "textfield",
+      "example": "apify/cheerio-scraper"
+    },
+    "actorCategory": {
+      "title": "Filter by Category",
+      "type": "string",
+      "description": "Filter actors by category to find the right one faster",
+      "editor": "select",
+      "default": "all",
+      "enum": ["all", "local", "social", "ecommerce", "travel", "professional", "content", "realestate", "data"],
+      "enumTitles": [
+        "All Categories",
+        "Local & Maps - Google Maps, Yelp, TripAdvisor",
+        "Social Media - Instagram, Twitter, TikTok, Reddit",
+        "E-Commerce - Amazon, eBay, Shopify, Walmart",
+        "Travel - Booking, Airbnb, Expedia",
+        "Professional - LinkedIn, Glassdoor, Indeed, Crunchbase",
+        "Content - Google Search, News, RSS feeds",
+        "Real Estate - Zillow, Realtor",
+        "Data Generators - Synthetic data, Trading signals"
+      ]
+    },
+    "actorRunMode": {
+      "title": "Data Source",
+      "type": "string",
+      "description": "Where to get the actor's data from",
+      "editor": "select",
+      "default": "latest",
+      "enum": ["latest", "specific", "fresh", "dataset", "discovery"],
+      "enumTitles": [
+        "Latest Run - Use data from the actor's most recent run",
+        "Specific Run - Provide a specific run ID",
+        "Fresh Run - Start a new actor run with custom input",
+        "Dataset Only - Access a specific dataset directly",
+        "Discovery Mode - List all supported actors (no data fetch)"
+      ]
+    },
+    "actorRunId": {
+      "title": "Specific Run ID",
+      "type": "string",
+      "description": "Run ID to fetch data from (when using 'Specific Run' mode)",
+      "editor": "textfield",
+      "example": "HG7ML7M8z78YcAPEB"
+    },
+    "actorDatasetId": {
+      "title": "Dataset ID",
+      "type": "string",
+      "description": "Dataset ID to fetch data from (when using 'Dataset Only' mode)",
+      "editor": "textfield",
+      "example": "3MmuMLbFVS3Iss36T"
+    },
+    "actorInput": {
+      "title": "Actor Input (Fresh Run)",
       "type": "object",
-      "description": "Configure how to fetch and memorize data from the actor",
+      "description": "Input configuration for starting a fresh actor run",
       "editor": "json",
       "prefill": {
-        "runId": "latest",
-        "memorizeFields": ["title", "description", "address"],
-        "limit": 100
+        "searchStrings": ["coffee shops in NYC"],
+        "maxResults": 50
       }
+    },
+    "actorConfig": {
+      "title": "Memory Settings",
+      "type": "object",
+      "description": "Configure how actor data is processed and stored in memory",
+      "editor": "json",
+      "prefill": {
+        "memorizeFields": ["title", "description", "address", "rating"],
+        "limit": 100,
+        "skipDuplicates": true,
+        "enrichWithMetadata": true
+      }
+    },
+    "actorTimeout": {
+      "title": "Actor Timeout",
+      "type": "integer",
+      "description": "Maximum wait time for fresh actor runs (in seconds). Longer timeouts allow more data but cost more.",
+      "default": 120,
+      "minimum": 30,
+      "maximum": 600,
+      "unit": "seconds"
+    },
+    "actorMemoryLimit": {
+      "title": "Actor Memory (MB)",
+      "type": "integer",
+      "description": "Memory allocation for fresh actor runs (higher = faster but costs more)",
+      "default": 1024,
+      "minimum": 256,
+      "maximum": 8192,
+      "unit": "MB"
     },
     "integrationConfig": {
       "title": "Synthetic Data Configuration",
