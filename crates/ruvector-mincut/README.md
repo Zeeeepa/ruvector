@@ -20,9 +20,9 @@ Subpolynomial-time dynamic minimum cut algorithm with real-time graph monitoring
 - 🧵 **Thread-Safe**: Concurrent reads with exclusive writes using fine-grained locking
 - 🚀 **Performance**: O(1) minimum cut queries after preprocessing
 
-### December 2024 Breakthrough
+### December 2025 Breakthrough
 
-This crate implements the **first deterministic exact fully-dynamic minimum cut algorithm** based on the December 2024 paper ([arxiv:2512.13105](https://arxiv.org/abs/2512.13105)):
+This crate implements the **first deterministic exact fully-dynamic minimum cut algorithm** based on the December 2025 paper ([arxiv:2512.13105](https://arxiv.org/abs/2512.13105)):
 
 | Component | Description |
 |-----------|-------------|
@@ -175,7 +175,7 @@ The crate implements a sophisticated multi-layered architecture:
 ┌─────────────────────────────────────────────────────────────┐
 │                  DynamicMinCut (Public API)                 │
 ├─────────────────────────────────────────────────────────────┤
-│  MinCutWrapper (December 2024 Paper Implementation)         │
+│  MinCutWrapper (December 2025 Paper Implementation)         │
 │  ├── O(log n) bounded-range instances                       │
 │  ├── Geometric ranges with factor 1.2                       │
 │  └── DeterministicLocalKCut oracle                          │
@@ -246,7 +246,7 @@ See [ALGORITHMS.md](docs/ALGORITHMS.md) for complete mathematical details.
 - **`EulerTourTree`**: Alternative dynamic tree structure
 - **`HierarchicalDecomposition`**: Tree-based decomposition
 
-### Paper Implementation Types (December 2024)
+### Paper Implementation Types (December 2025)
 
 - **`MinCutWrapper`**: O(log n) instance manager with geometric ranges
 - **`ProperCutInstance`**: Trait for bounded-range cut solvers
@@ -472,7 +472,7 @@ This implementation is based on research in dynamic graph algorithms:
 - **Dynamic Minimum Cut**: Thorup (2007)
 - **Graph Sparsification**: Benczúr & Karger (1996)
 - **Hierarchical Decomposition**: Thorup & Karger (2000)
-- **Deterministic Dynamic Min-Cut**: Jin et al. (December 2024)
+- **Deterministic Dynamic Min-Cut**: Jin et al. (December 2025)
 
 ## References
 
@@ -484,7 +484,7 @@ This implementation is based on research in dynamic graph algorithms:
 
 4. Henzinger, M., & King, V. (1999). "Randomized Fully Dynamic Graph Algorithms with Polylogarithmic Time per Operation". *JACM*.
 
-5. Jin, C., Naderi, D., & Yu, H. (December 2024). "Deterministic Exact Subpolynomial-Time Algorithms for Global Minimum Cut". *arXiv:2512.13105*. **[First deterministic exact fully-dynamic min-cut algorithm]**
+5. Jin, C., Naderi, D., & Yu, H. (December 2025). "Deterministic Exact Subpolynomial-Time Algorithms for Global Minimum Cut". *arXiv:2512.13105*. **[First deterministic exact fully-dynamic min-cut algorithm]**
 
 ## Related Crates
 
