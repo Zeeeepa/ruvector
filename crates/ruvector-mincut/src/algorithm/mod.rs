@@ -5,6 +5,10 @@
 //! - Support for edge insertions and deletions
 //! - Both exact and approximate modes
 
+pub mod replacement;
+
+pub use replacement::{ReplacementEdgeIndex, ReplacementIndexStats};
+
 use std::sync::Arc;
 use std::time::Instant;
 use parking_lot::RwLock;
