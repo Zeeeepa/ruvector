@@ -34,6 +34,18 @@ This crate implements the **first deterministic exact fully-dynamic minimum cut 
 | **FragmentingAlgorithm** | ✅ Integrated | Handles disconnected subgraphs |
 | **EulerTourTree** | ✅ Integrated | O(log n) dynamic connectivity with hybrid fallback |
 
+### SOTA Performance Optimizations
+
+Advanced optimizations pushing the implementation to state-of-the-art:
+
+| Optimization | Complexity | Description |
+|-------------|------------|-------------|
+| **ETT O(1) Cut Lookup** | O(1) → O(log n) | `enter_to_exit` HashMap enables O(1) exit node lookup in cut operation |
+| **Incremental Boundary** | O(1) vs O(m) | `BoundaryCache` updates boundary incrementally on edge changes |
+| **Batch Update API** | O(k) | `batch_insert_edges`, `batch_delete_edges` for bulk operations |
+| **Binary Search Instances** | O(log i) vs O(i) | `find_instance_for_value` with cached min-cut hint |
+| **Lazy Evaluation** | Deferred | Updates buffered until query, avoiding redundant computation |
+
 ### Agentic Chip Optimizations
 
 Optimized for deployment on agentic chips with 256 WASM cores × 8KB memory each:
